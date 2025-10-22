@@ -91,7 +91,7 @@ function getLogLevelFromConsoleLogType(t: string) {
   }
 }
 
-const rec = await page.screencast({path: "r.webm"})
+//const rec = await page.screencast({path: "r.webm"})
 
 try {
 logger.debug("extracting maplibre map object")
@@ -240,7 +240,7 @@ for (const m of metadata) {
   })
 }
 } finally {
-  await rec.stop()
+  //await rec.stop()
   await browser.close()
 
   logger.info("Done!")
