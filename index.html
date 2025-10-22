@@ -1,0 +1,53 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MDUI Image Gallery</title>
+  <link rel="stylesheet" href="style.css">
+  
+  <!--<script src="https://unpkg.com/mdui/umd/mdui.global.js"></script>-->
+  <style>
+    /* Basic layout for the gallery grid, since mdui v2 doesn't use mdui-row/col-xx-x classes */
+    .gallery-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      padding: 16px;
+    }
+    .gallery-container img {
+      width: 100%;
+      height: auto;
+      display: block;
+      cursor: pointer;
+      border-radius: 8px; /* Optional styling */
+      object-fit: cover;
+    }
+    .dialog-image {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      /* Remove mdui-img-fluid as it's a v1 class, use direct style or CSS */
+    }
+  </style>
+</head>
+<body>
+  <div style="max-width: 1200px; margin: 0 auto;">
+    <h1 style="text-align: center; margin: 20px 0;">Image Gallery</h1>
+    <div id="gallery" class="gallery-container"></div>
+  </div>
+
+  <mdui-dialog id="image-dialog">
+    <div style="padding: 24px;">
+      <img id="dialog-image" src="" alt="Image" class="dialog-image">
+    </div>
+
+    <div slot="action">
+      <mdui-button id="redirect-btn">Go to Location</mdui-button>
+    </div>
+  </mdui-dialog>
+
+  <script type="module" src="script.js"></script>
+</body>
+</html>

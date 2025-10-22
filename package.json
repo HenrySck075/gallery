@@ -1,0 +1,16 @@
+{
+  "name": "mdui-gallery",
+  "version": "1.0.0",
+  "description": "A dynamic image gallery using MDUI",
+  "main": "index.js",
+  "scripts": {
+    "start": "npx serve ."
+  },
+  "dependencies": {
+    "mdui": "^1.0.2",
+    "playwright": "^1.56.1"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.11"
+  }
+}
