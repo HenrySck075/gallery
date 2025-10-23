@@ -4,11 +4,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MDUI Image Gallery</title>
-  <link rel="stylesheet" href="style.css">
-  
-  <!--<script src="https://unpkg.com/mdui/umd/mdui.global.js"></script>-->
+  <title>YazawaLiner Gallery</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">  
+  <link rel="stylesheet" href="https://unpkg.com/mdui/mdui.css">
+  <script src="https://unpkg.com/mdui/mdui.global.js"></script>
+  <link
+    href="https://fonts.googleapis.com/icon?family=Material+Icons"
+    rel="stylesheet"
+  />
   <style>
+    body {
+        font-family: Roboto,Noto Sans SC,PingFang SC,Lantinghei SC,Microsoft Yahei,Hiragino Sans GB,"Microsoft Sans Serif",WenQuanYi Micro Hei,sans-serif
+    }
     /* Basic layout for the gallery grid, since mdui v2 doesn't use mdui-row/col-xx-x classes */
     .gallery-container {
       display: grid;
@@ -30,6 +38,17 @@
       display: block;
       /* Remove mdui-img-fluid as it's a v1 class, use direct style or CSS */
     }
+    #gallery img {
+      width: 100%;
+      height: auto;
+      cursor: pointer;
+    }
+    #image-dialog::part(panel) {
+      background-color: black;
+    }
+    #image-dialog::part(body), #amogus {
+      height: 100%;
+    }
   </style>
 </head>
 <body>
@@ -38,9 +57,19 @@
     <div id="gallery" class="gallery-container"></div>
   </div>
 
-  <mdui-dialog id="image-dialog">
-    <div style="padding: 24px;">
-      <img id="dialog-image" src="" alt="Image" class="dialog-image">
+  <mdui-dialog id="image-dialog" fullscreen>
+    <!--close button-->
+    <div slot="header">
+      <mdui-button-icon id="dialog-close" style="color: white;" icon="close"></mdui-button-icon>
+    </div>
+    <div id="amogus" style="padding: 24px; display: flex; flex-direction: column;">
+      <img id="dialog-image" src="" alt="Image" class="dialog-image" style="flex: 1">
+      <!--Metadata-->
+      <div style="width: 100%;">
+        <h2 id="title"></h2>
+        <p id="desc"></p>
+        <p id="tilePos"></p>
+      </div>
     </div>
 
     <div slot="action">
@@ -48,6 +77,7 @@
     </div>
   </mdui-dialog>
 
-  <script type="module" src="script.js"></script>
+  <script src="mercator_util.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>

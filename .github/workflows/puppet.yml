@@ -1,19 +1,28 @@
-name: Thumbnails Rendering (debug)
+name: Thumbnails rendering and pages build
 on:
   push:
-    branches: [ main, master ]
-    paths: 
-      - 'renderer/**'
-      - 'Dockerfile'
-      - 'metadata.json'
-      - '.github/workflows/puppet.yml'
-  pull_request:
-    branches: [ main, master ]
+    branches: [master]
+  schedule:
+    - cron: '6 22 * * 6'
+  workflow_dispatch:
+    inputs:
+      force_rebuild_docker:
+        description: "Rebuild Docker image"
+        type: boolean
+        required: false
+      force_recapture:
+        description: "Capture images"
+        type: boolean
+        required: false
+
+permissions:
+  contents: read
 jobs:
   filter:
     runs-on: ubuntu-latest
     outputs:
       docker_build: ${{ steps.filter.outputs.Dockerfile }}
+      render: ${{ steps.filter.outputs.renderer }}
     steps:
     - uses: actions/checkout@v4
     - uses: dorny/paths-filter@v3
@@ -24,10 +33,11 @@ jobs:
             - 'Dockerfile'
           renderer:
             - 'renderer/**'
+            - 'metadata.json'
   build-and-push-image:
     runs-on: ubuntu-latest
     needs: filter
-    if: needs.filter.outputs.docker_build == 'true'
+    if: needs.filter.outputs.docker_build == 'true' || inputs.force_rebuild_docker == 'true'
     permissions:
       contents: read
       packages: write # Required to push to GitHub Container Registry
@@ -64,13 +74,14 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha # Use GitHub Actions cache for layers
           cache-to: type=gha,mode=max # Store layers back to GitHub Actions cache for subsequent builds
-  test:
+  capture-images:
     timeout-minutes: 60
     runs-on: ubuntu-latest
-    needs: build-and-push-image
+    needs: [build-and-push-image, filter]
     if: |
       always() && 
-      (needs.build-and-push-image.result == 'success' || needs.build-and-push-image.result == 'skipped')
+      (needs.build-and-push-image.result == 'success' || needs.build-and-push-image.result == 'skipped') &&
+      (needs.filter.outputs.render == 'true' || github.event_name == 'schedule' || inputs.force_recapture == 'true' )
     permissions:
       contents: read
       packages: read
@@ -82,8 +93,12 @@ jobs:
     - name: Install dependencies
       run:  |
         npm ci
-        mkdir debug
       working-directory: ./renderer
+    - uses: actions/checkout@v4
+      with:
+        ref: images 
+        path: renderer/images 
+        token: ${{ secrets.PAT_WRITABLE }} 
     - name: mysterious
       run: |
         CMD_OUT=$(which chromium)
@@ -94,11 +109,72 @@ jobs:
     - name: Run task
       env:
         WEBGL_WORKAROUND: amogus
-      run: node main.ts ../metadata.json debug DEBUG
+      run: node main.ts ../metadata.json images DEBUG
       working-directory: ./renderer
-    - uses: actions/upload-artifact@v4
-      if: ${{ !cancelled() }}
-      with:
-        name: images
-        path: renderer/debug/
-        retention-days: 7
+
+    - name: Configure Git
+      run: |
+        git config user.name github-actions[bot]
+        git config user.email github-actions[bot]@users.noreply.github.com
+      working-directory: ./renderer/images
+
+    - name: Save images to images branch
+      run: |
+        git add .
+        if ! git diff-index --quiet HEAD; then
+          git commit -m "Images update"
+          git push
+        fi
+      working-directory: ./renderer/images
+
+
+  # The GitHub Pages
+  # Build job
+  build:
+    runs-on: ubuntu-latest
+    needs: capture-images
+    if: |
+      always() && 
+      (needs.capture-images.result == 'success' || needs.capture-images.result == 'skipped')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Checkout (images)
+        uses: actions/checkout@v4
+        with:
+          ref: images 
+          path: assets/images 
+          token: ${{ secrets.GITHUB_TOKEN }} 
+      - uses: subic/ghaction-thumbnails@master
+        with: 
+          source: 'assets/images' 
+          output: 'assets/thumbnails' 
+          sizes: 480
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+      - name: Build with Jekyll
+        uses: actions/jekyll-build-pages@v1
+        with:
+          source: ./
+          destination: ./_site
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+
+  # Deployment job
+  deploy:
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    # it would be very concerning if this is the way
+    if: |
+      always() && 
+      (needs.build.result == 'success' || needs.build.result == 'skipped')
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -218,6 +218,37 @@ const metadata: {
 logger.info("Capturing images")
 
 
+const canvasHandle = await page.waitForSelector("canvas.maplibregl-canvas");
+if (canvasHandle) {
+  // Anti-puppet-stupidity measure: delete every elements in body > div except the one that contains canvasHandle
+  // (also set up to hide cloudflare turnstile iframes)
+  await page.evaluate((canvasSel)=>{
+    const canvas = document.querySelector(canvasSel)
+    if (!canvas) return;
+    const bodyDiv = document.querySelector("body > div")
+    if (!bodyDiv) return;
+    for (const child of Array.from(bodyDiv.children)) {
+      if (!child.contains(canvas)) {
+        bodyDiv.removeChild(child)
+      }
+    }
+    // inside the remaining child, delete every child except #map
+    
+    const remainingChild = bodyDiv.children[0]
+    for (const child of Array.from(remainingChild.children)) {
+      if (child.id !== "map") {
+        remainingChild.removeChild(child)
+      }
+    }
+
+    // hide iframes
+    const iframes = document.querySelectorAll("iframe")
+    for (const iframe of Array.from(iframes)) {
+      iframe.style.display = "none"
+    }
+  }, "canvas.maplibregl-canvas")
+
+}
 for (const m of metadata) {
   logger.debug(`${m.img} ${m.bounds}`)
   // run ${__maplibre_map}.fitBounds(m.bounds, {animate: false}) and wait for 2s
@@ -229,11 +260,11 @@ for (const m of metadata) {
     replMode: true
   })
   // give it 10s to download stuff
-  await sleep(10000)
+  await sleep(5000)
 
   // figure out the aspect ratio of the bounds and calculate the new viewport width/height depending on whichever other axis is larger
-  const latDiff = Math.abs(m.bounds[1][0] - m.bounds[0][0])
-  const lonDiff = Math.abs(m.bounds[0][1] - m.bounds[1][1])
+  const latDiff = Math.abs(m.bounds[1][1] - m.bounds[0][1])
+  const lonDiff = Math.abs(m.bounds[0][0] - m.bounds[1][0])
   let newWidth = 1920
   let newHeight = 1080
   const targetAspect = 1920 / 1080
@@ -248,8 +279,7 @@ for (const m of metadata) {
 
   await page.setViewport({width: newWidth, height: newHeight});
 
-  const handle = await page.waitForSelector("canvas.maplibregl-canvas");
-  await handle!.screenshot({
+  await canvasHandle!.screenshot({
     // @ts-ignore
     path: saveFolder + "/" + m.img
   })

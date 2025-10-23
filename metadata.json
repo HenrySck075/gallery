@@ -1,13 +1,36 @@
 [
   {
-    "img": "img1.jpg",
+    "img": "numero_uno.jpg",
+    "title": "The Beginning of Everything",
+    "description": "This starts off as a little gag[citation needed] in Love Live HQ...",
+    "coordinate": [35.044317292618146, 138.89364224677735],
+    "zoom": 14.281434055006502,
+    "bounds": [
+      [138.88643521552729, 35.056692919609674],
+      [138.9012008405273, 35.03827270026619]
+    ]
+  },
+  {
+    "img": "nico.png",
     "title": "nico",
+    "description": "nico nico niii (Japan -> Marshall Islands)",
     "coordinate": [31.60690941490933, 161.69686490302732],
     "zoom": 14.043833242588326,
     "bounds": [
-      [161.67313443427736, 31.608256763810736], 
-      [161.7392281842773, 31.516442794636617]
+      [161.67190396552735, 31.6096040932141], 
+      [161.7241109967773, 31.511047974476682]
     ],
-    "categories": ["not sure if ill use this but whatever"]
+    "categories": ["muse", "countries-marker"]
+  }, {
+    "img": "aiscream_irl.png",
+    "title": "AiScReam (Official MV)",
+    "description": "HER NAME IS LOVE LIVE- wait rhats not even the correct answer",
+    "coordinate": [34.84807209343993, 143.81059537177734],
+    "zoom": 12.887293541509653,
+    "bounds": [
+      [143.69141568427733, 34.908494163787665],
+      [144.03067349677735, 34.75107336315009]
+    ],
+    "categories": ["aqours", "nijigaku", "liella", "aiscream"]
   }
 ]
