@@ -3,3 +3,5 @@ node_modules/
 # The 3 debug files made by the script
 *.log
 r.webp
+
+debug/

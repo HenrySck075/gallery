@@ -81,7 +81,7 @@ jobs:
     - name: Install dependencies
       run:  |
         npm ci
-        mkdir imgs
+        mkdir debug
       working-directory: ./renderer
     - name: mysterious
       run: |
@@ -93,11 +93,12 @@ jobs:
     - name: Run task
       env:
         WEBGL_WORKAROUND: amogus
-      run: node main.ts ../metadata.json imgs DEBUG
+        ENABLE_RECORDING: yes
+      run: node main.ts ../metadata.json debug DEBUG
       working-directory: ./renderer
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
       with:
         name: images
-        path: renderer/imgs/
+        path: renderer/debug/
         retention-days: 7

@@ -175,7 +175,7 @@ devtools.on("Debugger.scriptParsed", (p)=>{
 
 await page.goto("https://wplace.live")
 if (process.env.ENABLE_RECORDING)
-  rec = await page.screencast({path: "r.webm"})
+  rec = await page.screencast({path: "debug/r.webm"})
 try{
   const h = await page.locator("div#map ~ div > div button[title=Explore]").waitHandle()
   // wait for a random good delay before clicking
