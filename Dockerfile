@@ -4,7 +4,7 @@
 # Start with a base image that includes a package manager (like Debian/Ubuntu for apt)
 # We'll use a Node.js base image directly to get Node.js pre-installed efficiently.
 # This image is based on Debian, so we can use apt-get for Chromium.
-FROM node:20-slim
+FROM node:24
 
 # Set a working directory (optional, but good practice)
 WORKDIR /app
@@ -14,7 +14,7 @@ WORKDIR /app
 # The 'rm -rf /var/lib/apt/lists/*' cleans up apt cache to further reduce image size.
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-    chromium-browser \
+    chromium \
     # Chromium often needs these for headless mode, especially in containers
     fonts-liberation \
     libappindicator3-1 \

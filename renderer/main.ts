@@ -56,7 +56,7 @@ logger.info("Starting browser...")
 const browser: Browser = await puppeteer.launch({
   headless: true,
   executablePath: CHROMIUM_PATH,
-  args: ['--no-sandbox', ...(process.env.ANDROID_ROOT==="/system" ? ['--disable-gpu'] : []), ...(process.env.WEBGL_WORKAROUND ? [/*'--enable-unsafe-swiftshader'*/'--use-gl=egl'] : [])]
+  args: ['--no-sandbox', ...(process.env.ANDROID_ROOT==="/system" ? ['--disable-gpu'] : []), ...(process.env.WEBGL_WORKAROUND ? ['--enable-unsafe-swiftshader', '--use-gl=angle'] : [])]
 })
 
 import UserAgents from "user-agents"
@@ -240,7 +240,7 @@ for (const m of metadata) {
 
   await page.setViewport({width: newWidth, height: newHeight});
 
-  (await page.locator("canvas.maplibregl-canvas").waitHandle()).screenshot({
+  await (await page.locator("canvas.maplibregl-canvas").waitHandle()).screenshot({
     // @ts-ignore
     path: saveFolder + "/" + m.img
   })
