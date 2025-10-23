@@ -37,6 +37,7 @@ RUN apt-get update && \
     libxrender1 \
     libxss1 \
     libxtst6 \
+    ffmpeg \
     # Clean up
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
