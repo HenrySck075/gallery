@@ -153,11 +153,6 @@ devtools.on("Debugger.scriptParsed", (p)=>{
           const evalResult = await devtools.send("Runtime.evaluate", {
             expression: `window.${mapobj_name} !== undefined`
           })
-          // log the object's properties just to be sure
-          logger.debug("Extracted map object properties: ", await devtools.send("Runtime.evaluate", {
-            expression: `window.${mapobj_name}`,
-            returnByValue: true
-          }))
           if (!evalResult.result.value) {
             logger.error("Failed to extract maplibre map object!")
             return
@@ -224,7 +219,7 @@ for (const m of metadata) {
   logger.debug(`${m.img} ${m.bounds}`)
   // run ${__maplibre_map}.fitBounds(m.bounds, {animate: false}) and wait for 2s
   await devtools.send("Runtime.evaluate", {
-    expression: `${mapobj_name}.fitBounds(${JSON.stringify(m.bounds)}, {animate: false, duration: 0})`
+    expression: `${mapobj_name}.fitBounds(${JSON.stringify(m.bounds)}, {duration: 1000})`
   })
   // give it 10s to download stuff
   await new Promise((r) => setTimeout(r, 10000))
