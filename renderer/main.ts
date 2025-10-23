@@ -153,6 +153,10 @@ devtools.on("Debugger.scriptParsed", (p)=>{
           const evalResult = await devtools.send("Runtime.evaluate", {
             expression: `window.${mapobj_name} !== undefined`
           })
+          // log the object's properties just to be sure
+          logger.debug("Extracted map object properties: ", await devtools.send("Runtime.evaluate", {
+            expression: `Object.keys(window.${mapobj_name})`
+          }))
           if (!evalResult.result.value) {
             logger.error("Failed to extract maplibre map object!")
             return
