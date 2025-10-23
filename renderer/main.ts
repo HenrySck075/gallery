@@ -197,6 +197,8 @@ await devtools.send("Debugger.disable")
 devtools.removeAllListeners()
 
 logger.debug("doned")
+const mc = fs.readFileSync(metadataFile).toString("utf-8")
+logger.debug("Metadata content: ",mc)
 
 // actual work
 const metadata: {
@@ -207,7 +209,7 @@ const metadata: {
     // bottomright
     [number, number]
   ]
-}[] = JSON.parse(fs.readFileSync(metadataFile).toString("utf-8"))
+}[] = JSON.parse(mc)
 
 logger.info("Capturing images")
 
@@ -246,6 +248,7 @@ for (const m of metadata) {
 } catch(e){
   // log the error
   logger.fatal("An error occurred: ", e)
+  process.exitCode = 1
 } finally {
 
 await rec?.stop()
