@@ -56,7 +56,7 @@ logger.info("Starting browser...")
 const browser: Browser = await puppeteer.launch({
   headless: true,
   executablePath: CHROMIUM_PATH,
-  args: ['--no-sandbox', ...(process.env.ANDROID_ROOT==="/system" ? ['--disable-gpu'] : []), ...(process.env.WEBGL_WORKAROUND ? ['--enable-unsafe-swiftshader', '--use-gl=angle', '--disable-webgl-image-chromium', '--disable-gpu-compositing', '--disable-dev-shm-usage'] : [])]
+  args: ['--no-sandbox', ...(process.env.ANDROID_ROOT==="/system" ? ['--disable-gpu'] : []), ...(process.env.WEBGL_WORKAROUND ? ['--use-gl=egl', '--disable-webgl-image-chromium', '--disable-gpu-compositing', '--disable-dev-shm-usage'] : [])]
 })
 
 import UserAgents from "user-agents"
@@ -219,9 +219,10 @@ for (const m of metadata) {
   logger.debug(`${m.img} ${m.bounds}`)
   // run ${__maplibre_map}.fitBounds(m.bounds, {animate: false}) and wait for 2s
   await devtools.send("Runtime.evaluate", {
-    expression: `${mapobj_name}.fitBounds([[${m.bounds[0][0]}, ${m.bounds[0][1]}], [${m.bounds[1][0]}, ${m.bounds[1][1]}], ], {animate: false})`
+    expression: `${mapobj_name}.fitBounds([[${m.bounds[0][0]}, ${m.bounds[0][1]}], [${m.bounds[1][0]}, ${m.bounds[1][1]}], ], {animate: false, duration: 0})`
   })
-  await new Promise((r) => setTimeout(r, 2000))
+  // give it 10s to download stuff
+  await new Promise((r) => setTimeout(r, 10000))
 
   // figure out the aspect ratio of the bounds and calculate the new viewport width/height depending on whichever other axis is larger
   const latDiff = Math.abs(m.bounds[0][0] - m.bounds[1][0])
