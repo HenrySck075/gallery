@@ -12,6 +12,10 @@ if (!fs.existsSync(saveFolder)) {
   process.exit(1)
 }
 
+function sleep(delay: number) {
+  return new Promise((r)=>setTimeout(r, delay))
+}
+
 import l from "log4js"
 
 l.configure({
@@ -189,7 +193,7 @@ try{
 }
 // Eternally waits until maplibre_map_extracted is true
 while (!maplibre_map_extracted) {
-  await new Promise((r) => setTimeout(r, 100))
+  await sleep(100)
 }
 
 // disable debugger again we dont need it
@@ -218,11 +222,13 @@ await page.setViewport({width: 1920, height: 1080})
 for (const m of metadata) {
   logger.debug(`${m.img} ${m.bounds}`)
   // run ${__maplibre_map}.fitBounds(m.bounds, {animate: false}) and wait for 2s
+  const expression = `window.${mapobj_name}.fitBounds(${JSON.stringify(m.bounds)}, {animate: false, duration: 0})`
+  logger.debug(expression)
   await devtools.send("Runtime.evaluate", {
-    expression: `${mapobj_name}.fitBounds(${JSON.stringify(m.bounds)}, {duration: 1000})`
+    expression 
   })
   // give it 10s to download stuff
-  await new Promise((r) => setTimeout(r, 10000))
+  await sleep(10000)
 
   // figure out the aspect ratio of the bounds and calculate the new viewport width/height depending on whichever other axis is larger
   const latDiff = Math.abs(m.bounds[1][0] - m.bounds[0][0])
