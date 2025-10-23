@@ -178,8 +178,9 @@ devtools.on("Debugger.scriptParsed", (p)=>{
 })
 
 await page.goto("https://wplace.live")
+await page.setViewport({width: 1920, height: 1080})
 if (process.env.ENABLE_RECORDING)
-  rec = await page.screencast({path: "debug/r.webm"})
+  rec = await page.screencast({path: "debug/r.mp4", format: "mp4"})
 try{
   const h = await page.locator("div#map ~ div > div button[title=Explore]").waitHandle()
   // wait for a random good delay before clicking
@@ -217,7 +218,6 @@ const metadata: {
 
 logger.info("Capturing images")
 
-await page.setViewport({width: 1920, height: 1080})
 
 for (const m of metadata) {
   logger.debug(`${m.img} ${m.bounds}`)
