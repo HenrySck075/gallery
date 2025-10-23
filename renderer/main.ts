@@ -219,7 +219,7 @@ for (const m of metadata) {
   logger.debug(`${m.img} ${m.bounds}`)
   // run ${__maplibre_map}.fitBounds(m.bounds, {animate: false}) and wait for 2s
   await devtools.send("Runtime.evaluate", {
-    expression: `${mapobj_name}.fitBounds([[${m.bounds[0][0]}, ${m.bounds[0][1]}], [${m.bounds[1][0]}, ${m.bounds[1][1]}], ], {animate: false, duration: 0})`
+    expression: `${mapobj_name}.fitBounds(${JSON.stringify(m.bounds)}, {animate: false, duration: 0})`
   })
   // give it 10s to download stuff
   await new Promise((r) => setTimeout(r, 10000))
@@ -245,6 +245,18 @@ for (const m of metadata) {
     // @ts-ignore
     path: saveFolder + "/" + m.img
   })
+
+  // Location check
+  // Click the center of the screen, wait for a bit, then logs the "location" localStorage item to console
+  const centerPos = {x: Math.floor(newWidth / 2), y: Math.floor(newHeight / 2)}
+  await page.mouse.click(centerPos.x, centerPos.y)
+  await new Promise((r) => setTimeout(r, 400))
+  const loc = await devtools.send("Runtime.evaluate", {
+    expression: `localStorage.getItem("location")`
+  })
+  logger.info(`Captured ${m.img} at location ${loc.result.value}`),
+  await new Promise((r)=>setTimeout(r, 1000));
+  (await page.$("body div.absolute.bottom-0.left-0.z-50.w-full.sm\\:left-1\\/2.sm\\:max-w-md.sm\\:-translate-x-1\\/2.md\\:max-w-lg > div > div > div.flex.gap-2.px-3 > button"))!.click()
 }
 } catch(e){
   // log the error
