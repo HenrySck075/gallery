@@ -94,7 +94,6 @@ jobs:
     - name: Run task
       env:
         WEBGL_WORKAROUND: amogus
-        ENABLE_RECORDING: yes
       run: node main.ts ../metadata.json debug DEBUG
       working-directory: ./renderer
     - uses: actions/upload-artifact@v4

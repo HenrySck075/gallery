@@ -248,11 +248,13 @@ for (const m of metadata) {
 
   await page.setViewport({width: newWidth, height: newHeight});
 
-  await (await page.locator("canvas.maplibregl-canvas").waitHandle()).screenshot({
+  const handle = await page.waitForSelector("canvas.maplibregl-canvas");
+  await handle!.screenshot({
     // @ts-ignore
     path: saveFolder + "/" + m.img
   })
 
+  /*
   // Location check
   // Click the center of the screen, wait for a bit, then logs the "location" localStorage item to console
   const centerPos = {x: Math.floor(newWidth / 2), y: Math.floor(newHeight / 2)}
@@ -263,7 +265,8 @@ for (const m of metadata) {
   })
   logger.info(`Captured ${m.img} at location ${loc.result.value}`),
   await new Promise((r)=>setTimeout(r, 1000));
-  await (await page.$("body div.absolute.bottom-0.left-0.z-50.w-full.sm\\:left-1\\/2.sm\\:max-w-md.sm\\:-translate-x-1\\/2.md\\:max-w-lg > div > div > div.flex.gap-2.px-3 > button"))!.click()
+  await page.locator("body div.absolute.bottom-0.left-0.z-50.w-full.sm\\:left-1\\/2.sm\\:max-w-md.sm\\:-translate-x-1\\/2.md\\:max-w-lg > div > div > div.flex.gap-2.px-3 > button").click()
+  */
 }
 } catch(e){
   // log the error
