@@ -225,7 +225,7 @@ for (const m of metadata) {
   await new Promise((r) => setTimeout(r, 10000))
 
   // figure out the aspect ratio of the bounds and calculate the new viewport width/height depending on whichever other axis is larger
-  const latDiff = Math.abs(m.bounds[0][0] - m.bounds[1][0])
+  const latDiff = Math.abs(m.bounds[1][0] - m.bounds[0][0])
   const lonDiff = Math.abs(m.bounds[0][1] - m.bounds[1][1])
   let newWidth = 1920
   let newHeight = 1080
@@ -256,7 +256,7 @@ for (const m of metadata) {
   })
   logger.info(`Captured ${m.img} at location ${loc.result.value}`),
   await new Promise((r)=>setTimeout(r, 1000));
-  (await page.$("body div.absolute.bottom-0.left-0.z-50.w-full.sm\\:left-1\\/2.sm\\:max-w-md.sm\\:-translate-x-1\\/2.md\\:max-w-lg > div > div > div.flex.gap-2.px-3 > button"))!.click()
+  await (await page.$("body div.absolute.bottom-0.left-0.z-50.w-full.sm\\:left-1\\/2.sm\\:max-w-md.sm\\:-translate-x-1\\/2.md\\:max-w-lg > div > div > div.flex.gap-2.px-3 > button"))!.click()
 }
 } catch(e){
   // log the error
