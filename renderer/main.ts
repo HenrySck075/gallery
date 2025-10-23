@@ -1,7 +1,7 @@
 import fs from 'fs'
 
-const metadataFile = process.argv[1]
-const saveFolder = process.argv[2]
+const metadataFile = process.argv[2]
+const saveFolder = process.argv[3]
 // check both's existence before continuing
 if (!fs.existsSync(metadataFile)) {
   console.error(`Metadata file ${metadataFile} does not exist.`)
@@ -37,7 +37,7 @@ l.configure({
 })
 
 const logger = l.getLogger()
-logger.level = process.argv[3] ?? "INFO"
+logger.level = process.argv[4] ?? "INFO"
 
 const CHROMIUM_PATH = process.env.CHROMIUM_PATH
 
@@ -198,7 +198,7 @@ devtools.removeAllListeners()
 
 logger.debug("doned")
 const mc = fs.readFileSync(metadataFile).toString("utf-8")
-logger.debug("Metadata content: ",mc)
+logger.debug("Metadata file: ",metadataFile)
 
 // actual work
 const metadata: {
