@@ -5,6 +5,7 @@ on:
     paths: 
       - 'renderer/**'
       - 'Dockerfile'
+      - 'metadata.json'
       - '.github/workflows/puppet.yml'
   pull_request:
     branches: [ main, master ]
