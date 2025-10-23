@@ -60,7 +60,7 @@ logger.info("Starting browser...")
 const browser: Browser = await puppeteer.launch({
   headless: true,
   executablePath: CHROMIUM_PATH,
-  args: ['--no-sandbox', ...(process.env.ANDROID_ROOT==="/system" ? ['--disable-gpu'] : []), ...(process.env.WEBGL_WORKAROUND ? ['--use-gl=egl', '--disable-webgl-image-chromium', '--disable-gpu-compositing', '--disable-dev-shm-usage'] : [])]
+  args: ['--no-sandbox', '--force-prefers-reduced-motion', ...(process.env.ANDROID_ROOT==="/system" ? ['--disable-gpu'] : []), ...(process.env.WEBGL_WORKAROUND ? ['--use-gl=egl', '--disable-webgl-image-chromium', '--disable-gpu-compositing', '--disable-dev-shm-usage'] : [])]
 })
 
 import UserAgents from "user-agents"
