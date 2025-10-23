@@ -252,6 +252,8 @@ for (const m of metadata) {
 } finally {
 
 await rec?.stop()
+await devtools.detach()
+await page.close()
 await browser.close()
 
 logger.info("Done!")
