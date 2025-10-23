@@ -26,6 +26,7 @@ jobs:
     - name: Run task
       env:
         CHROMIUM_PATH: /usr/bin/chromium-browser
+        WEBGL_WORKAROUND: amogus
       run: node main.ts ../metadata.json imgs
       working-directory: ./renderer
     - uses: actions/upload-artifact@v4

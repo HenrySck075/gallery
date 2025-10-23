@@ -47,7 +47,7 @@ if (CHROMIUM_PATH === undefined && process.env.ANDROID_ROOT==="/system") {
 }
 
 import puppeteer from "puppeteer-extra"
-import type { Browser } from "puppeteer-core"
+import type { Browser, ScreenRecorder } from "puppeteer-core"
 import puppetstealth from "puppeteer-extra-plugin-stealth"
 
 puppeteer.use(puppetstealth())
@@ -56,7 +56,7 @@ logger.info("Starting browser...")
 const browser: Browser = await puppeteer.launch({
   headless: true,
   executablePath: CHROMIUM_PATH,
-  args: ['--no-sandbox', ...(process.env.ANDROID_ROOT==="/system" ? ['--disable-gpu'] : [])]
+  args: ['--no-sandbox', ...(process.env.ANDROID_ROOT==="/system" ? ['--disable-gpu'] : []), ...(process.env.WEBGL_WORKAROUND ? [/*'--enable-unsafe-swiftshader'*/'--use-gl=egl'] : [])]
 })
 
 import UserAgents from "user-agents"
@@ -73,7 +73,6 @@ page.on('console', (msg) => {
   cdpLogger.log(getLogLevelFromConsoleLogType(msg.type()), msg.text());
 });
 logger.debug("navigating to page")
-await page.goto("https://wplace.live")
 
 /// yes
 /// returns the same for debug, warn, error; debug for trace, error for assert and info for everythibg else 
@@ -91,7 +90,7 @@ function getLogLevelFromConsoleLogType(t: string) {
   }
 }
 
-//const rec = await page.screencast({path: "r.webm"})
+let rec: ScreenRecorder | null = null
 
 try {
 logger.debug("extracting maplibre map object")
@@ -100,12 +99,12 @@ const mapobj_name = "__maplibre_map"
 let maplibre_map_extracted = false
 
 const bpIds: string[] = []
-await page.locator("body[data-sveltekit-preload-data]").waitHandle()
-await devtools.send("Debugger.enable")
 
+await devtools.send("Debugger.enable")
 devtools.on("Debugger.scriptParsed", (p)=>{
-  if (!p.url.startsWith("https://wplace.live/_app/immutable/nodes")) return;
+  if (!p.url.startsWith("https://wplace.live/_app/immutable/nodes/")) return;
   if (p.url.startsWith("https://wplace.live/_app/immutable/nodes/app")) return;
+  logger.debug(p.url)
 
   // Find the position after "{get map(){return " (before the return) in the src
   devtools.send("Debugger.getScriptSource", {scriptId: p.scriptId}).then(async (src)=>{
@@ -167,22 +166,27 @@ devtools.on("Debugger.scriptParsed", (p)=>{
           // resume execution
           await devtools.send("Debugger.resume")
           maplibre_map_extracted = true
+          return
         }
       }
     })
   })
 })
 
-page.locator("div#map ~ div > div > div > button[titl]").waitHandle().then(async (v)=>{
+await page.goto("https://wplace.live")
+if (process.env.ENABLE_RECORDING)
+  rec = await page.screencast({path: "r.webm"})
+try{
+  const h = await page.locator("div#map ~ div > div button[title=Explore]").waitHandle()
   // wait for a random good delay before clicking
   setTimeout(async ()=>{
     logger.debug("Trigger map() function call")
-    await v.click()
+    await h.click()
   }, 4000 + Math.random() * 2000)
-}).catch((r)=>{
+} catch(v){
   logger.fatal("Cannot locate the explore button, probably the map is unable to be initialized?")
   throw "exit"
-})
+}
 // Eternally waits until maplibre_map_extracted is true
 while (!maplibre_map_extracted) {
   await new Promise((r) => setTimeout(r, 100))
@@ -239,9 +243,13 @@ for (const m of metadata) {
     path: saveFolder + "/" + m.img
   })
 }
+} catch(e){
+  // log the error
+  logger.fatal("An error occurred: ", e)
 } finally {
-  //await rec.stop()
-  await browser.close()
 
-  logger.info("Done!")
+await rec?.stop()
+await browser.close()
+
+logger.info("Done!")
 }
