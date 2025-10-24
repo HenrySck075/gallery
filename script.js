@@ -11,6 +11,8 @@ const dialogCloseBtn = document.getElementById('dialog-close');
 const dialogImage = document.getElementById('dialog-image');
 const redirectBtn = document.getElementById('redirect-btn');
 
+dialog.fullscreen = mdui.breakpoint().down("md")
+
 
 const m_title = document.getElementById("title");
 const m_desc = document.getElementById("desc");
