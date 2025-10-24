@@ -46,7 +46,7 @@
     #image-dialog::part(panel) {
       background-color: black;
     }
-    #image-dialog::part(body), #amogus {
+    #image-dialog::part(body) {
       height: 100%;
     }
   </style>
@@ -62,7 +62,7 @@
     <div slot="header">
       <mdui-button-icon id="dialog-close" style="color: white;" icon="close"></mdui-button-icon>
     </div>
-    <div id="amogus" style="padding: 24px; display: flex; flex-direction: column;">
+    <div id="amogus" style="padding: 24px">
       <img id="dialog-image" src="" alt="Image" class="dialog-image">
       <!--Metadata-->
       <div style="width: 100%;">
