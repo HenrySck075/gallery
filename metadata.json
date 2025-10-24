@@ -32,5 +32,43 @@
       [144.03067349677735, 34.75107336315009]
     ],
     "categories": ["aqours", "nijigaku", "liella", "aiscream"]
+  },
+  {
+    "img": "rhythm.png",
+    "title": "iirc this is rhythm heaven?",
+    "description": "feel free to submit a pr changing this at https://github.com/rinaboards/gallery btw",
+    "coordinate": [34.94048976144947, 141.95909146552734],
+    "zoom": 14.375239912262845,
+    "bounds": [
+      [141.8952828717773, 34.947694255619936],
+      [142.0278219342773, 34.886003308498275]
+    ]
+  },
+  {
+    "img": "machine_love.png",
+    "title": "Machine Love",
+    "bounds": [
+      [141.4111813092773, 35.03438665475368],
+      [141.63635709052733, 34.930546520029296]
+    ]
+  },
+  {
+    "img": "teto.jpg",
+    "title": "teto",
+    "description": "teto",
+    "bounds": [
+      [141.4727047467773, 34.90734093640603],
+      [141.51207974677732, 34.87504399446622]
+    ],
+    "categories": ["teto", "fnuny"]
+  },
+  {
+    "img": "nicomaki.png",
+    "title": "NicoMaki LLSIF Art (iirc)",
+    "zoom": 12.3737372922,
+    "bounds": [
+      [141.29393521552734, 35.01408985934674],
+      [141.38428677802733, 34.972760960310495]
+    ]
   }
 ]

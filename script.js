@@ -38,12 +38,28 @@ fetch('metadata.json')
       const itemContainer = document.createElement('div');
       itemContainer.className = 'gallery-item'; // Use a generic class for styling
 
+      const llp = item.coordinate;
+      if (llp == undefined) {
+        /*
+         * img.bounds: [
+         *   [lng, lat], // southwest side
+         *   [lng, lat] // northeast side
+         * ]*/
+
+        // just set llp as the center point of the bounds nobody cares
+        const bounds = item.bounds;
+        const sw = bounds[0];
+        const ne = bounds[1];
+        const centerLat = (sw[1] + ne[1]) / 2;
+        const centerLng = (sw[0] + ne[0]) / 2;
+        llp = [centerLat, centerLng];
+      }
       // The image element
       const img = document.createElement('img');
       img.src = `assets/thumbnails/480/${item.img}`;
       img.alt = item.title;
-      img.setAttribute('data-lat', item.coordinate[0]);
-      img.setAttribute('data-lng', item.coordinate[1]);
+      img.setAttribute('data-lat', llp[0]);
+      img.setAttribute('data-lng', llp[1]);
       
       itemContainer.appendChild(img);
       gallery.appendChild(itemContainer);
@@ -63,12 +79,12 @@ fetch('metadata.json')
         m_title.textContent = item.title;
         m_desc.textContent = item.description ?? "";
 
-        const tilePos = mercUtil.latLonToTileAndPixel(item.coordinate[0], item.coordinate[1], 11)
+        const tilePos = mercUtil.latLonToTileAndPixel(llp[0], llp[1], 11)
 
-        m_tilePos.innerHTML = `Tx: ${tilePos.tile[0]}, Ty: ${tilePos.tile[1]}, Px: ${tilePos.pixel[0]}, Py: ${tilePos.pixel[1]}<br/>C: ${item.coordinate}`
+        m_tilePos.innerHTML = `Tx: ${tilePos.tile[0]}, Ty: ${tilePos.tile[1]}, Px: ${tilePos.pixel[0]}, Py: ${tilePos.pixel[1]}<br/>C: ${llp}`
         
         redirectBtn.onclick = () => {
-          window.location.href = `https://wplace.live/?lat=${item.coordinate[0]}&lng=${item.coordinate[1]}&zoom=${item.zoom}`;
+          window.location.href = `https://wplace.live/?lat=${llp[0]}&lng=${llp[1]}&zoom=${item.zoom??1}`;
         };
 
         dialog.open = true;
