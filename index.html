@@ -8,6 +8,7 @@
 
   <!--<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">-->
   <script type="module" src="assets/fluent.js"></script>
+  <link rel="stylesheet" href="assets/css/style.css">
   <style>
     /*
     body {
@@ -50,7 +51,7 @@
 </head>
 <body>
   <div style="max-width: 1200px; margin: 0 auto; padding: 24px;">
-    <fluent-heading level="1" style="text-align: center; margin: 20px 0;">Image Gallery</fluent-heading>
+    <fluent-text block as="h1" style="text-align: center; margin: 20px 0;">Image Gallery</fluent-text>
     <fluent-text>Collection of arts around the YazawaLiner line system that is safe enough to be put on GitHub i think and is also cool</fluent-text>
     <div id="gallery" class="gallery-container"></div>
   </div>
@@ -59,9 +60,9 @@
     <fluent-dialog-body>
       <img id="dialog-image" src="" alt="Image" class="dialog-image">
       <div style="width: 100%;">
-        <fluent-text as="h2" id="title"></fluent-text>
-        <fluent-text id="desc"></fluent-text>
-        <fluent-text id="tilePos"></fluent-text>
+        <fluent-text block as="h2" id="title"></fluent-text>
+        <fluent-text block id="desc"></fluent-text>
+        <fluent-text block id="tilePos"></fluent-text>
       </div>
       <fluent-button id="redirect-btn" appearance="accent" style="margin-top: 16px;">Go to Location</fluent-button>
     </fluent-dialog-body>

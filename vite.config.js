@@ -6,7 +6,7 @@ export default defineConfig({
     emptyOutDir: false,
     rollupOptions: {
       external: [
-        "assets/fluent.js"
+        "assets/fluent.js",
       ],
       input: {
         fluent: 'fluent-setup.js',
