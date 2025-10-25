@@ -266,8 +266,8 @@ for (const m of metadata) {
   await sleep(5000)
 
   // figure out the aspect ratio of the bounds and calculate the new viewport width/height depending on whichever other axis is larger
-  const pxCoordSW = mercUtil.latLonToPixels(m.bounds[0].reverse())
-  const pxCoordNE = mercUtil.latLonToPixels(m.bounds[1].reverse())
+  const pxCoordSW = mercUtil.latLonToPixels(...m.bounds[0].reverse(),11)
+  const pxCoordNE = mercUtil.latLonToPixels(...m.bounds[1].reverse(),11)
   const yDiff = Math.abs(pxCoordSW[1] - pxCoordNE[1])
   const xDiff = Math.abs(pxCoordSW[0] - pxCoordNE[0])
   let newWidth = 1920
@@ -282,9 +282,9 @@ for (const m of metadata) {
     // taller than target, adjust width
     newWidth = Math.round(newHeight * boundsAspect)
   }
-  logger.debug(`${newWidth}x${newHeight} ${xDiff}${yDiff}`);
+  logger.debug(`${newWidth}x${newHeight} ${xDiff}${yDiff} ${boundsAspect}`);
 
-  await page.setViewport({width: Math.trunc(newWidth), height: Math.trunc(newHeight)});
+  await page.setViewport({width: newWidth, height: newHeight});
 
   await canvasHandle!.screenshot({
     // @ts-ignore
