@@ -272,7 +272,7 @@ for (const m of metadata) {
   if (boundsAspect > targetAspect) {
     // wider than target, adjust height
     // TODO: better way to calculate the height
-    newHeight = Math.round(newWidth / boundsAspect)+0.33
+    newHeight = Math.round(newWidth / boundsAspect)+1
   } else {
     // taller than target, adjust width
     newWidth = Math.round(newHeight * boundsAspect)
