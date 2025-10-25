@@ -7,7 +7,6 @@
     "start": "npx serve ."
   },
   "dependencies": {
-    "mdui": "^1.0.2",
     "playwright": "^1.56.1"
   },
   "devDependencies": {

@@ -9,3 +9,7 @@ This script saves images of wplace arts specified through a metadata file **at t
     CHROMIUM_PATH=/path/to/chromium-based-browser
     ```
 - Your precious time waiting for your headless browser to go through every single coordinates provided, take a snapshot of it, and save it to the disk (if any)
+
+# How it works
+magic
+
