@@ -258,7 +258,6 @@ for (const m of metadata) {
   // run ${__maplibre_map}.fitBounds(m.bounds, {animate: false}) and wait for 2s
   await page.setViewport({width: 1920, height: 1080})
   const expression = `window.${mapobj_name}.resize();await new Promise((r)=>setTimeout(r,500));window.${mapobj_name}.fitBounds(${JSON.stringify(m.bounds)}, {animate: false, duration: 0})`
-  logger.debug(expression)
   await devtools.send("Runtime.evaluate", {
     expression,
     replMode: true
@@ -269,7 +268,7 @@ for (const m of metadata) {
   // figure out the aspect ratio of the bounds and calculate the new viewport width/height depending on whichever other axis is larger
   const pxCoordSW = mercUtil.latLonToPixels(m.bounds[0])
   const pxCoordNE = mercUtil.latLonToPixels(m.bounds[1])
-  const yDiff = Math.abs(pxCoordNE[1] - pxCoordSW[1])
+  const yDiff = Math.abs(pxCoordSW[1] - pxCoordNE[1])
   const xDiff = Math.abs(pxCoordSW[0] - pxCoordNE[0])
   let newWidth = 1920
   let newHeight = 1080
@@ -283,6 +282,7 @@ for (const m of metadata) {
     // taller than target, adjust width
     newWidth = Math.round(newHeight * boundsAspect) | 0
   }
+  logger.debug(`${newWidth}x${newHeight}`);
 
   await page.setViewport({width: newWidth, height: newHeight});
 
