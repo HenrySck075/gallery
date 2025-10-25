@@ -2,11 +2,14 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
   build: {
-    outDir: '../_site',
+    outDir: '_site',
+    emptyOutDir: false,
     rollupOptions: {
+      external: [
+        "assets/fluent.js"
+      ],
       input: {
-        main: '../index.html',
-        fluent: './fluent-setup.js',
+        fluent: 'fluent-setup.js',
       },
       output: {
         entryFileNames: 'assets/[name].js',

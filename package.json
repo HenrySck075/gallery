@@ -1,15 +1,17 @@
 {
-  "name": "mdui-gallery",
+  "name": "yazawaliner-gallery",
+  "private": true,
   "version": "1.0.0",
-  "description": "A dynamic image gallery using MDUI",
+  "description": "zura",
   "main": "index.js",
   "scripts": {
-    "start": "npx serve ."
+    "build": "vite build"
   },
   "dependencies": {
-    "playwright": "^1.56.1"
+    "@fluentui/tokens": "^1.0.0-alpha.22",
+    "@fluentui/web-components": "^3.0.0-beta.130"
   },
   "devDependencies": {
-    "esbuild": "^0.25.11"
+    "vite": "^4.0.0"
   }
 }

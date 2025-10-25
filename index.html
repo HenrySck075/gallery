@@ -6,13 +6,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>YazawaLiner Gallery</title>
 
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">  
+  <!--<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">-->
   <script type="module" src="assets/fluent.js"></script>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
   <style>
+    /*
     body {
         font-family: Roboto,Noto Sans SC,PingFang SC,Lantinghei SC,Microsoft Yahei,Hiragino Sans GB,"Microsoft Sans Serif",WenQuanYi Micro Hei,sans-serif
     }
+        */
   /* Basic layout for the gallery grid, now using Fluent UI Web Components */
     .gallery-container {
       display: grid;
@@ -48,14 +49,14 @@
   </style>
 </head>
 <body>
-  <fluent-card style="max-width: 1200px; margin: 0 auto; padding: 24px;">
+  <div style="max-width: 1200px; margin: 0 auto; padding: 24px;">
     <fluent-heading level="1" style="text-align: center; margin: 20px 0;">Image Gallery</fluent-heading>
     <fluent-text>Collection of arts around the YazawaLiner line system that is safe enough to be put on GitHub i think and is also cool</fluent-text>
     <div id="gallery" class="gallery-container"></div>
-  </fluent-card>
+  </div>
 
-  <fluent-dialog id="image-dialog" modal>
-    <fluent-card style="background: black; color: white; padding: 24px;">
+  <fluent-dialog id="image-dialog">
+    <fluent-dialog-body style="background: black; color: white; padding: 24px;">
       <fluent-button id="dialog-close" appearance="stealth" style="float: right; color: white;">
         <span class="fluent-icons">&#xE5CD;</span> <!-- close icon unicode -->
       </fluent-button>
@@ -66,7 +67,7 @@
         <fluent-text id="tilePos"></fluent-text>
       </div>
       <fluent-button id="redirect-btn" appearance="accent" style="margin-top: 16px;">Go to Location</fluent-button>
-    </fluent-card>
+    </fluent-dialog-body>
   </fluent-dialog>
 
   <script src="mercator_util.js"></script>

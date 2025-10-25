@@ -187,7 +187,7 @@ try{
   setTimeout(async ()=>{
     logger.debug("Trigger map() function call")
     await h.click()
-  }, 4000 + Math.random() * 2000)
+  }, 2000 + Math.random() * 2000)
 } catch(v){
   logger.fatal("Cannot locate the explore button, probably the map is unable to be initialized?")
   throw "exit"
@@ -262,8 +262,8 @@ for (const m of metadata) {
     expression,
     replMode: true
   })
-  // give it 10s to download stuff
-  await sleep(5000)
+  // give it some time to download stuff
+  await sleep(3200)
 
   // figure out the aspect ratio of the bounds and calculate the new viewport width/height depending on whichever other axis is larger
   const pxCoordSW = mercUtil.latLonToPixels(...m.bounds[0].reverse(),11)

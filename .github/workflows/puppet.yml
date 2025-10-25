@@ -156,14 +156,17 @@ jobs:
         with:
           source: ./
           destination: ./_site
+
       # Just to be safe we'll be writing vite files after jekyll
-      - name: Install Vite dependencies
+      # Future: nvm it fucking blocks vite from deleting a file
+      # Future 2: ok vite deletes the folder
+      - name: Fix output dir permissions because vite wants to delete the output assets for some reason
         run: |
-          cd vite
-          npm ci
+          sudo chown -R $(id -u):$(id -g) ./_site
+          sudo chmod -R u+rwX ./_site
       - name: Build Fluent UI bundle
-        run: |
-          cd vite
+        run: | 
+          npm ci
           npm run build
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
