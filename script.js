@@ -38,7 +38,7 @@ fetch('metadata.json')
       const itemContainer = document.createElement('div');
       itemContainer.className = 'gallery-item'; // Use a generic class for styling
 
-      const llp = item.coordinate;
+      let llp = item.coordinate;
       if (llp == undefined) {
         /*
          * img.bounds: [
