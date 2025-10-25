@@ -64,6 +64,7 @@ const browser: Browser = await puppeteer.launch({
 })
 
 import UserAgents from "user-agents"
+import { MercatorUtils } from './mercator_util.mjs'
 
 const page = await browser.newPage()
 page.setUserAgent({userAgent: (new UserAgents()).toString()})
@@ -218,6 +219,7 @@ const metadata: {
 logger.info("Capturing images")
 
 
+
 const canvasHandle = await page.waitForSelector("canvas.maplibregl-canvas");
 if (canvasHandle) {
   // Anti-puppet-stupidity measure: delete every elements in body > div except the one that contains canvasHandle
@@ -249,6 +251,8 @@ if (canvasHandle) {
   }, "canvas.maplibregl-canvas")
 
 }
+
+const mercUtil = new MercatorUtils(1000)
 for (const m of metadata) {
   logger.debug(`${m.img} ${m.bounds}`)
   // run ${__maplibre_map}.fitBounds(m.bounds, {animate: false}) and wait for 2s
@@ -263,12 +267,14 @@ for (const m of metadata) {
   await sleep(5000)
 
   // figure out the aspect ratio of the bounds and calculate the new viewport width/height depending on whichever other axis is larger
-  const latDiff = Math.abs(m.bounds[1][1] - m.bounds[0][1])
-  const lonDiff = Math.abs(m.bounds[0][0] - m.bounds[1][0])
+  const pxCoordSW = mercUtil.latLonToPixels(m.bounds[0])
+  const pxCoordNE = mercUtil.latLonToPixels(m.bounds[1])
+  const yDiff = Math.abs(pxCoordNE[1] - pxCoordSW[1])
+  const xDiff = Math.abs(pxCoordSW[0] - pxCoordNE[0])
   let newWidth = 1920
   let newHeight = 1080
   const targetAspect = 1920 / 1080
-  const boundsAspect = lonDiff / latDiff
+  const boundsAspect = xDiff / yDiff
   if (boundsAspect > targetAspect) {
     // wider than target, adjust height
     // TODO: better way to calculate the height
