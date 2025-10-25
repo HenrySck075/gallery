@@ -277,14 +277,14 @@ for (const m of metadata) {
   if (boundsAspect > targetAspect) {
     // wider than target, adjust height
     // TODO: better way to calculate the height
-    newHeight = Math.round(newWidth / boundsAspect) | 0
+    newHeight = Math.round(newWidth / boundsAspect)
   } else {
     // taller than target, adjust width
-    newWidth = Math.round(newHeight * boundsAspect) | 0
+    newWidth = Math.round(newHeight * boundsAspect)
   }
   logger.debug(`${newWidth}x${newHeight}`);
 
-  await page.setViewport({width: newWidth, height: newHeight});
+  await page.setViewport({width: Math.trunc(newWidth), height: Math.trunc(newHeight)});
 
   await canvasHandle!.screenshot({
     // @ts-ignore
