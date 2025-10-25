@@ -278,10 +278,10 @@ for (const m of metadata) {
   if (boundsAspect > targetAspect) {
     // wider than target, adjust height
     // TODO: better way to calculate the height
-    newHeight = Math.round(newWidth / boundsAspect)+1
+    newHeight = Math.round(newWidth / boundsAspect) | 0
   } else {
     // taller than target, adjust width
-    newWidth = Math.round(newHeight * boundsAspect)
+    newWidth = Math.round(newHeight * boundsAspect) | 0
   }
 
   await page.setViewport({width: newWidth, height: newHeight});
