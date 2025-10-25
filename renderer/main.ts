@@ -271,7 +271,8 @@ for (const m of metadata) {
   const boundsAspect = lonDiff / latDiff
   if (boundsAspect > targetAspect) {
     // wider than target, adjust height
-    newHeight = Math.round(newWidth / boundsAspect)
+    // TODO: better way to calculate the height
+    newHeight = Math.round(newWidth / boundsAspect)+0.33
   } else {
     // taller than target, adjust width
     newWidth = Math.round(newHeight * boundsAspect)
