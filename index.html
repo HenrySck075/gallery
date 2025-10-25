@@ -56,13 +56,10 @@
   </div>
 
   <fluent-dialog id="image-dialog">
-    <fluent-dialog-body style="background: black; color: white; padding: 24px;">
-      <fluent-button id="dialog-close" appearance="stealth" style="float: right; color: white;">
-        <span class="fluent-icons">&#xE5CD;</span> <!-- close icon unicode -->
-      </fluent-button>
+    <fluent-dialog-body>
       <img id="dialog-image" src="" alt="Image" class="dialog-image">
       <div style="width: 100%;">
-        <fluent-heading level="2" id="title"></fluent-heading>
+        <fluent-text as="h2" id="title"></fluent-text>
         <fluent-text id="desc"></fluent-text>
         <fluent-text id="tilePos"></fluent-text>
       </div>

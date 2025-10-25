@@ -7,11 +7,8 @@
 const gallery = document.getElementById('gallery');
 // Get the dialog component directly
 const dialog = document.getElementById('image-dialog'); 
-const dialogCloseBtn = document.getElementById('dialog-close'); 
 const dialogImage = document.getElementById('dialog-image');
 const redirectBtn = document.getElementById('redirect-btn');
-
-dialog.fullscreen = mdui.breakpoint().down("md")
 
 
 const m_title = document.getElementById("title");
@@ -25,9 +22,6 @@ redirectBtn.addEventListener('click', () => {
   // We can remove this if we keep the .onclick inside the fetch loop.
 });
 
-dialogCloseBtn.addEventListener('click', () => {
-  dialog.open = false; // Correct method to close an MDUI v2 Web Component dialog
-});
 
 // Load metadata
 fetch('metadata.json')
@@ -87,7 +81,7 @@ fetch('metadata.json')
           window.location.href = `https://wplace.live/?lat=${llp[0]}&lng=${llp[1]}&zoom=${item.zoom??1}`;
         };
 
-        dialog.open = true;
+        dialog.show();
       });
     });
   })
