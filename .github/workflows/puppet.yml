@@ -3,7 +3,7 @@ on:
   push:
     branches: [master]
   schedule:
-    - cron: '6 22 * * 6'
+    - cron: '6 22 */3 * *'
   workflow_dispatch:
     inputs:
       force_rebuild_docker:
