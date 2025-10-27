@@ -215,6 +215,15 @@ const metadata: {
     [number, number]
   ]
 }[] = JSON.parse(mc)
+// https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array/12646864#12646864
+function shuffleArray(array: any[]) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+}
+
+shuffleArray(metadata)
 
 logger.info("Capturing images")
 
@@ -263,7 +272,7 @@ for (const m of metadata) {
     replMode: true
   })
   // give it some time to download stuff
-  await sleep(3200)
+  await sleep(2000)
 
   // figure out the aspect ratio of the bounds and calculate the new viewport width/height depending on whichever other axis is larger
   const pxCoordSW = mercUtil.latLonToPixels(...m.bounds[0].reverse(),11)
