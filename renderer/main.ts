@@ -19,22 +19,22 @@ function sleep(delay: number) {
 import l from "log4js"
 
 l.configure({
-  "appenders": {
-    "mein": {
-      "type": "console",
+  appenders: {
+    main: {
+      type: "console",
     },
     chromium: {
       type: "file",
       filename: "chromium.log"
     }
   },
-  "categories": {
-    "default": {
-      appenders: ["mein"],
+  categories: {
+    default: {
+      appenders: ["main"],
       level: "DEBUG"
     },
-    "cdp": {
-      appenders: ["chromium", "mein"],
+    cdp: {
+      appenders: ["main"],
       level: "DEBUG"
     }
   }
@@ -272,7 +272,7 @@ for (const m of metadata) {
     replMode: true
   })
   // give it some time to download stuff
-  await sleep(2000)
+  await sleep(1600)
 
   // figure out the aspect ratio of the bounds and calculate the new viewport width/height depending on whichever other axis is larger
   const pxCoordSW = mercUtil.latLonToPixels(...m.bounds[0].reverse(),11)

@@ -10,10 +10,12 @@ on:
         description: "Rebuild Docker image"
         type: boolean
         required: false
+        default: false
       force_recapture:
         description: "Capture images"
         type: boolean
         required: false
+        default: false
 
 permissions:
   contents: read
@@ -91,14 +93,9 @@ jobs:
     - uses: actions/checkout@v4
  
     - name: Install dependencies
-      run: npm ci
+      run: "npm ci && mkdir images"
       working-directory: ./renderer
-    - uses: actions/checkout@v4
-      with:
-        ref: images 
-        path: renderer/images 
-        token: ${{ secrets.PAT_WRITABLE }} 
-    - name: mysterious
+    - name: Find chromium
       run: |
         CMD_OUT=$(which chromium)
         if [ -z "$CMD_OUT" ]; then
@@ -110,22 +107,24 @@ jobs:
         WEBGL_WORKAROUND: amogus
       run: node main.ts ../metadata.json images DEBUG
       working-directory: ./renderer
+    - name: Roll a Windows Spotlight background for fun
+      run: node spotlight.ts
+      working-directory: ./renderer
 
-    - name: Configure Git
-      run: |
-        git config user.name github-actions[bot]
-        git config user.email github-actions[bot]@users.noreply.github.com
-      working-directory: ./renderer/images
-
-    - name: Save images branch
-      run: |
-        git add .
-        if ! git diff-index --quiet HEAD; then
-          git commit -m "Images update"
-          git push
-        fi
-      working-directory: ./renderer/images
-
+    - name: Delete old images artifact
+      uses: philips-labs/action-delete-artifacts@v1.0.0
+      with:
+          workflow: puppet.yml
+          # becausw this delete all specified artifacts, we need to run this step beforehand
+          name: wplace-images
+          workflow_conclusion: success
+      # if it doesnt exist either this is first run or skill issue
+      continue-on-error: true
+    - name: Upload images
+      uses: actions/upload-artifact@v4
+      with:
+        name: wplace-images
+        path: renderer/images
 
   # The GitHub Pages
   # Build job
@@ -138,12 +137,29 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Checkout (images)
-        uses: actions/checkout@v4
+      - name: Get images (from latest run)
+        if: needs.capture-images.result == 'skipped'
+        uses: dawidd6/action-download-artifact@v3
         with:
-          ref: images 
-          path: assets/images 
-          token: ${{ secrets.GITHUB_TOKEN }} 
+          # This is the name of the artifact uploaded in the 'generator' job
+          name: wplace-images 
+          
+          # Crucial: Search for the last run that successfully created the artifact
+          workflow: puppet.yml 
+          workflow_conclusion: completed
+          branch: ${{ github.ref_name }}
+          check_artifacts: true
+          search_artifacts: true
+          
+          # Optional: Define the local path where the files will be downloaded
+          path: ./assets/images 
+      - name: Get images (from this run)
+        if: needs.capture-images.result == 'success'
+        uses: actions/download-artifact@v4
+        with:
+          name: wplace-images
+          path: ./assets/images
+
       - uses: subic/ghaction-thumbnails@master
         with: 
           source: 'assets/images' 

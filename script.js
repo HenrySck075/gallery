@@ -1,9 +1,4 @@
-// script.js
-
-
-// If using the <script src="https://unpkg.com/mdui/umd/mdui.global.js"></script> tag:
-// You don't need the imports at all.
-
+(async ()=>{
 const gallery = document.getElementById('gallery');
 // Get the dialog component directly
 const dialog = document.getElementById('image-dialog'); 
@@ -15,13 +10,14 @@ const m_title = document.getElementById("title");
 const m_desc = document.getElementById("desc");
 const m_tilePos = document.getElementById("tilePos");
 
-// Add event listener to the native Web Component button
-redirectBtn.addEventListener('click', () => {
-  // The click logic is set in the fetch loop, but we need to ensure the listener is registered.
-  // The .onclick approach is simpler inside the loop for dynamic data. We'll stick to that in the loop.
-  // We can remove this if we keep the .onclick inside the fetch loop.
-});
 
+// load up /assets/images/spotlight/COUNT as an integer
+const sldata = (await (await fetch('assets/images/spotlight/items')).text()).split("\n")
+const spotlights = parseInt(sldata.shift());
+const spotlightIdx = Math.round(Math.random() * (spotlights - 1));
+
+document.documentElement.style.setProperty("--spotlight-background-landscape", `url("assets/images/spotlight/landscape/${sldata[spotlightIdx]}")`)
+document.documentElement.style.setProperty("--spotlight-background-portrait", `url("assets/images/spotlight/portrait/${sldata[spotlights+spotlightIdx]}")`)
 
 // Load metadata
 fetch('metadata.json')
@@ -90,4 +86,4 @@ fetch('metadata.json')
 
 
 
-
+})()

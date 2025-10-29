@@ -16,6 +16,16 @@
     }
         */
   /* Basic layout for the gallery grid, now using Fluent UI Web Components */
+    body {
+      background-image: var(--spotlight-background-landscape);
+    }
+    /*mobile variant which uses portrait one instead*/
+    @media (max-width: 600px) {
+      body {
+        background-image: var(--spotlight-background-portrait);
+      }
+    }
+
 
     .gallery-container {
       display: grid;
@@ -50,7 +60,6 @@
     }
     /*bg colors are handled by fluentui library itself*/
     .mica {
-      position: fixed;
       -webkit-backdrop-filter: blur(40px);
       backdrop-filter: blur(40px);
       overflow-y: auto;
@@ -62,6 +71,10 @@
   <div style="max-width: 1200px; margin: 0 auto; padding: 24px; background-color: var(--colorNeutralBackground2); color: var(--colorNeutralForeground2);" class="mica">
     <fluent-text block style="text-align: center; margin: 20px 0;"><h1>Image Gallery</h1></fluent-text>
     <fluent-text>Collection of arts around the YazawaLiner line system that is safe enough to be put on GitHub i think and is also cool</fluent-text>
+    <fluent-text block style="text-align: center; margin: 20px 0;; font-size: 11px">
+      <p>© 2025 HenrySck075. All Rights Reserved...</p>
+      <p>...except, all images and artwork displayed on this site (including that very blurry Spotlight images in the background) are the property of and belongs to their respective owners and creators.</p>
+    </fluent-text>
     <div id="gallery" class="gallery-container"></div>
   </div>
 
