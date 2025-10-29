@@ -15,11 +15,11 @@
         font-family: Roboto,Noto Sans SC,PingFang SC,Lantinghei SC,Microsoft Yahei,Hiragino Sans GB,"Microsoft Sans Serif",WenQuanYi Micro Hei,sans-serif
     }
         */
-  /* Basic layout for the gallery grid, now using Fluent UI Web Components */
     body {
       background-image: var(--spotlight-background-landscape);
       background-repeat: no-repeat;
       max-height: 1vh;
+      overflow-y: hidden; /*??????*/
     }
     /*mobile variant which uses portrait one instead*/
     @media (max-width: 600px) {
@@ -47,7 +47,7 @@
       max-width: 100%;
       height: auto;
       display: block;
-      /* Remove mdui-img-fluid as it's a v1 class, use direct style or CSS */
+      padding-bottom: 8px;
     }
     #gallery img {
       width: 100%;
@@ -62,8 +62,8 @@
     }
     /*bg colors are handled by fluentui library itself*/
     .bg {
-      -webkit-backdrop-filter: blur(40px);
-      backdrop-filter: blur(40px);
+      -webkit-backdrop-filter: blur(36px);
+      backdrop-filter: blur(36px);
       overflow-y: scroll;
       background-image: url('noise.png');
       background-repeat: repeat;
