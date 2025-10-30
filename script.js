@@ -23,11 +23,35 @@ document.documentElement.style.setProperty("--spotlight-background-portrait", `u
 fetch('metadata.json')
   .then(response => response.json())
   .then(data => {
+    // collect all categories
+    const categories = new Set(data.map((v)=>v.categories??[]).flat());
+    document.getElementById("filter-dropdown-options").append(Array.from(categories).map((v)=>{
+      const e = document.createElement("fluent-option");
+      e.value = v;
+      e.textContent = v;
+      return e;
+    }));
+    const fd = document.getElementById("filter-dropdown");
+    let wlwlwl = undefined
+    fd.addEventListener("change", ()=>{
+      clearTimeout(wlwlwl);
+      wlwlwl = setTimeout(()=>{
+        const selectedCategories = fd.enabledOptions.filter((v)=>v._currentSelected).map((v)=>v._value)
+        // disable visibility on all items not containing any of the selected categories
+        document.querySelectorAll(".gallery-item").forEach((item)=>{
+          const itemCategories = JSON.parse(item.dataset.category);
+          const hasCategory = selectedCategories.length === 0 || selectedCategories.some((cat)=>itemCategories.includes(cat));
+          item.style.display = hasCategory ? "block" : "none";
+        })
+      }, 1500);
+    })
+
     data.forEach(item => {
       // Use standard HTML for the grid items
       const itemContainer = document.createElement('div');
       itemContainer.className = 'gallery-item'; // Use a generic class for styling
-
+      itemContainer.dataset.category = JSON.stringify(item["categories"] ?? [])
+  
       let llp = item.coordinate;
       if (llp == undefined) {
         /*

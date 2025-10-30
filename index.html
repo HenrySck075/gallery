@@ -79,10 +79,17 @@
     <fluent-text block style="padding-top: 4px;">
       Submit images through <a href="https://github.com/rinaboards/gallery/issues">the page's issues list</a> (see <a href="https://github.com/rinaboards/gallery/blob/master/CONTRIBUTING.md">here</a> for how to write an entry)
     </fluent-text>
-    <fluent-text block style="text-align: center; margin: 20px 0;; font-size: 11px">
+    <fluent-text block style="margin: 20px 0; font-size: 11px">
       <p>© 2025 HenrySck075. All Rights Reserved...</p>
       <p>...except, all images and artwork displayed on this site (including that very blurry Spotlight images in the background) are the property of and belongs to their respective owners and creators.</p>
     </fluent-text>
+    <div style="display: flex; flex-direction: row;"> 
+      <div style="flex: 1;"></div>
+      <fluent-dropdown multiple placeholder="Filter" id="filter-dropdown">
+        <fluent-listbox id="filter-dropdown-options">
+        </fluent-listbox>
+      </fluent-dropdown>
+    </div>
     <div id="gallery" class="gallery-container"></div>
   </div>
 
