@@ -25,13 +25,17 @@ fetch('metadata.json')
   .then(data => {
     // collect all categories
     const categories = new Set(data.map((v)=>v.categories??[]).flat());
-    document.getElementById("filter-dropdown-options").append(Array.from(categories).map((v)=>{
+    console.log(categories)
+    document.getElementById("filter-dropdown-options").append(...(Array.from(categories).map((v)=>{
       const e = document.createElement("fluent-option");
       e.value = v;
       e.textContent = v;
       return e;
-    }));
+    })));
     const fd = document.getElementById("filter-dropdown");
+    document.getElementById("filter-clear").onclick = ()=>{
+      fd.enabledOptions.forEach((v)=>v.selected = false);
+    }
     let wlwlwl = undefined
     fd.addEventListener("change", ()=>{
       clearTimeout(wlwlwl);
@@ -72,6 +76,9 @@ fetch('metadata.json')
       const img = document.createElement('img');
       img.src = `assets/thumbnails/480/${item.img}`;
       img.alt = item.title;
+      img.loading = "lazy";
+      img.width = "100px";
+      img.height = "100px";
       img.setAttribute('data-lat', llp[0]);
       img.setAttribute('data-lng', llp[1]);
       
