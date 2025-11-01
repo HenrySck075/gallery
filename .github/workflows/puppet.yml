@@ -167,6 +167,14 @@ jobs:
           sizes: 480
       - name: Setup Pages
         uses: actions/configure-pages@v5
+      - name: Delete irrelevant files
+        run: rm -rf tools renderer package.json package-lock.json Dockerfile vite.config.js
+      - name: bash script textwall
+        id: get_artifact_date
+        env: 
+          TOKEN="${{ secrets.GITHUB_TOKEN }}" 
+        run: bash jackpot.bash
+
       - name: Build with Jekyll
         uses: actions/jekyll-build-pages@v1
         with:
