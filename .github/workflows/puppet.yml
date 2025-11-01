@@ -167,8 +167,6 @@ jobs:
           sizes: 480
       - name: Setup Pages
         uses: actions/configure-pages@v5
-      - name: Delete irrelevant files
-        run: rm -rf tools renderer package.json package-lock.json Dockerfile vite.config.js
       - name: Get gallery artifact date
         id: find_images_date
         uses: actions/github-script@v8
@@ -259,6 +257,8 @@ jobs:
         run: | 
           npm ci
           npm run build
+      - name: Delete irrelevant files
+        run: rm -rf tools renderer Dockerfile vite.config.js package.json package-lock.json
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
 
