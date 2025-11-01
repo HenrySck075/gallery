@@ -169,11 +169,78 @@ jobs:
         uses: actions/configure-pages@v5
       - name: Delete irrelevant files
         run: rm -rf tools renderer package.json package-lock.json Dockerfile vite.config.js
-      - name: bash script textwall
-        id: get_artifact_date
-        env: 
-          TOKEN="${{ secrets.GITHUB_TOKEN }}" 
-        run: bash jackpot.bash
+      - name: Get gallery artifact date
+        id: find_images_date
+        uses: actions/github-script@v8
+        with:
+          # The built-in GITHUB_TOKEN is used by default and passed safely
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const workflowFile = 'puppet.yml';
+            const artifactName = 'images';
+
+            let latestUploadDate = null;
+            let page = 1;
+            const per_page = 20; // Check 20 runs at a time
+
+            // Loop to check recent pages of successful workflow runs
+            while (!latestUploadDate && page <= 5) { // Limit to check 100 runs max (5 pages)
+                
+                // 1. Get a page of the most recent successful runs for the specific workflow file
+                const runsResponse = await github.rest.actions.listWorkflowRuns({
+                    owner,
+                    repo,
+                    workflow_id: workflowFile,
+                    status: 'success',
+                    per_page,
+                    page
+                });
+                
+                const workflowRuns = runsResponse.data.workflow_runs;
+                if (workflowRuns.length === 0) {
+                    console.log('No more successful workflow runs found.');
+                    break;
+                }
+
+                // 2. Iterate through runs on this page (newest to oldest)
+                for (const run of workflowRuns) {
+                    
+                    // 3. List artifacts for this specific run ID, filtered by name
+                    const artifactsResponse = await github.rest.actions.listWorkflowRunArtifacts({
+                        owner,
+                        repo,
+                        run_id: run.id,
+                    });
+
+                    const targetArtifact = artifactsResponse.data.artifacts.find(
+                        artifact => artifact.name === artifactName
+                    );
+
+                    if (targetArtifact) {
+                        // Found it! This is the latest one since we search runs by descending order.
+                        latestUploadDate = targetArtifact.created_at;
+                        console.log(`✅ Found artifact '${artifactName}' in run ID ${run.id}.`);
+                        break; // Exit the inner loop
+                    }
+                }
+
+                if (latestUploadDate) {
+                    break; // Exit the outer loop
+                }
+                page++;
+            }
+
+            if (latestUploadDate) {
+                // Set the result as an output variable for use in subsequent steps
+                core.setOutput('latest_upload_date', latestUploadDate);
+                console.log(`The latest upload date is: ${latestUploadDate}`);
+            } else {
+                core.setFailed(`Artifact '${artifactName}' not found in the most recent successful runs of ${workflowFile}.`);
+            }
+          
+      - name: "that one step to replace {{UPLOAD_DATE}} in index.html to the actual date"
+        run: sed -i "s/{{UPLOAD_DATE}}/${{ steps.find_date.outputs.latest_upload_date }}/g" index.html
 
       - name: Build with Jekyll
         uses: actions/jekyll-build-pages@v1
