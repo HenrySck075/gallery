@@ -10,14 +10,21 @@ const m_title = document.getElementById("title");
 const m_desc = document.getElementById("desc");
 const m_tilePos = document.getElementById("tilePos");
 
+{
+  const date = document.getElementById("date");
+  date.textContent += (new Date(date.dataset.lastupdated)).toDateString()
+}
 
-// load up /assets/images/spotlight/COUNT as an integer
-const sldata = (await (await fetch('assets/images/spotlight/items')).text()).split("\n")
+const full_version = window.location.pathname.endsWith("/world") && WORLD;
+
+const p = (str) => full_version ? `../${str}` : str;
+
+const sldata = (await (await fetch(p('assets/spotlight/items'))).text()).split("\n")
 const spotlights = parseInt(sldata.shift());
 const spotlightIdx = Math.round(Math.random() * (spotlights - 1));
 
-document.documentElement.style.setProperty("--spotlight-background-landscape", `url("assets/images/spotlight/landscape/${sldata[spotlightIdx]}")`)
-document.documentElement.style.setProperty("--spotlight-background-portrait", `url("assets/images/spotlight/portrait/${sldata[spotlights+spotlightIdx]}")`)
+document.documentElement.style.setProperty("--spotlight-background-landscape", `url("${p(`assets/spotlight/landscape/${sldata[spotlightIdx]}`)}")`)
+document.documentElement.style.setProperty("--spotlight-background-portrait", `url("${p(`assets/spotlight/portrait/${sldata[spotlights+spotlightIdx]}`)}")`)
 
 // Load metadata
 fetch('metadata.json')
@@ -74,7 +81,7 @@ fetch('metadata.json')
       }
       // The image element
       const img = document.createElement('img');
-      img.src = `assets/thumbnails/480/${item.img}`;
+      img.src = p(`assets/thumbnails/${full_version ? 'world' : 'domestic'}/${item.img}`);
       img.alt = item.title;
       img.loading = "lazy";
       img.width = "100px";
@@ -96,7 +103,7 @@ fetch('metadata.json')
       }
 
       img.addEventListener('click', () => {
-        dialogImage.src = `assets/images/${item.img}`;
+        dialogImage.src = p(`assets/images/${full_version ? 'world' : 'domestic'}/${item.img}`);
         m_title.textContent = item.title;
         m_desc.textContent = item.description ?? "";
 

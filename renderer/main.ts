@@ -1,7 +1,8 @@
 import fs from 'fs'
 
 const metadataFile = process.argv[2]
-const saveFolder = process.argv[3]
+const worldMetadataFile = process.argv[3]
+const saveFolder = "assets/images/"
 // check both's existence before continuing
 if (!fs.existsSync(metadataFile)) {
   console.error(`Metadata file ${metadataFile} does not exist.`)
@@ -202,11 +203,18 @@ await devtools.send("Debugger.disable")
 devtools.removeAllListeners()
 
 logger.debug("doned")
-const mc = fs.readFileSync(metadataFile).toString("utf-8")
-logger.debug("Metadata file: ",metadataFile)
+
+// https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array/12646864#12646864
+function shuffleArray(array: any[]) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array
+}
 
 // actual work
-const metadata: {
+const metadata: Record<string, {
   img: string,
   bounds: [
     // topleft
@@ -214,16 +222,11 @@ const metadata: {
     // bottomright
     [number, number]
   ]
-}[] = JSON.parse(mc)
-// https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array/12646864#12646864
-function shuffleArray(array: any[]) {
-    for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-    }
+}[]> = {
+  domestic: shuffleArray(JSON.parse(fs.readFileSync(metadataFile).toString("utf-8"))),
+  world: shuffleArray(JSON.parse(fs.readFileSync(worldMetadataFile).toString("utf-8")))
 }
 
-shuffleArray(metadata)
 
 logger.info("Capturing images")
 
@@ -261,58 +264,68 @@ if (canvasHandle) {
 
 }
 
-const mercUtil = new MercatorUtils(1000)
-for (const m of metadata) {
-  logger.debug(`${m.img} ${m.bounds}`)
-  // run ${__maplibre_map}.fitBounds(m.bounds, {animate: false}) and wait for 2s
-  await page.setViewport({width: 1920, height: 1080})
-  const expression = `window.${mapobj_name}.resize();await new Promise((r)=>setTimeout(r,500));window.${mapobj_name}.fitBounds(${JSON.stringify(m.bounds)}, {animate: false, duration: 0})`
-  await devtools.send("Runtime.evaluate", {
-    expression,
-    replMode: true
-  })
-  // give it some time to download stuff
-  await sleep(1600)
-
-  // figure out the aspect ratio of the bounds and calculate the new viewport width/height depending on whichever other axis is larger
-  const pxCoordSW = mercUtil.latLonToPixels(...m.bounds[0].reverse(),11)
-  const pxCoordNE = mercUtil.latLonToPixels(...m.bounds[1].reverse(),11)
-  const yDiff = Math.abs(pxCoordSW[1] - pxCoordNE[1])
-  const xDiff = Math.abs(pxCoordSW[0] - pxCoordNE[0])
-  let newWidth = 1920
-  let newHeight = 1080
-  const targetAspect = 1920 / 1080
-  const boundsAspect = xDiff / yDiff
-  if (boundsAspect > targetAspect) {
-    // wider than target, adjust height
-    // TODO: better way to calculate the height
-    newHeight = Math.round(newWidth / boundsAspect)
-  } else {
-    // taller than target, adjust width
-    newWidth = Math.round(newHeight * boundsAspect)
+// Create all save folders
+for (const t of Object.keys(metadata)) {
+  const folderPath = `${saveFolder}/${t}`
+  if (!fs.existsSync(folderPath)) {
+    fs.mkdirSync(folderPath, {recursive: true})
   }
-  logger.debug(`${newWidth}x${newHeight} ${xDiff}${yDiff} ${boundsAspect}`);
+}
 
-  await page.setViewport({width: newWidth, height: newHeight});
+const mercUtil = new MercatorUtils(1000)
+for (const [t, met] of Object.entries(metadata)) {
+  for (const m of met) {
+    logger.debug(`${m.img} ${m.bounds}`)
+    // run ${__maplibre_map}.fitBounds(m.bounds, {animate: false}) and wait for 2s
+    await page.setViewport({width: 1920, height: 1080})
+    const expression = `window.${mapobj_name}.resize();await new Promise((r)=>setTimeout(r,500));window.${mapobj_name}.fitBounds(${JSON.stringify(m.bounds)}, {animate: false, duration: 0})`
+    await devtools.send("Runtime.evaluate", {
+      expression,
+      replMode: true
+    })
+    // give it some time to download stuff
+    await sleep(1600)
 
-  await canvasHandle!.screenshot({
-    // @ts-ignore
-    path: saveFolder + "/" + m.img
-  })
+    // figure out the aspect ratio of the bounds and calculate the new viewport width/height depending on whichever other axis is larger
+    const pxCoordSW = mercUtil.latLonToPixels(...m.bounds[0].reverse(),11)
+    const pxCoordNE = mercUtil.latLonToPixels(...m.bounds[1].reverse(),11)
+    const yDiff = Math.abs(pxCoordSW[1] - pxCoordNE[1])
+    const xDiff = Math.abs(pxCoordSW[0] - pxCoordNE[0])
+    let newWidth = 1920
+    let newHeight = 1080
+    const targetAspect = 1920 / 1080
+    const boundsAspect = xDiff / yDiff
+    if (boundsAspect > targetAspect) {
+      // wider than target, adjust height
+      // TODO: better way to calculate the height
+      newHeight = Math.round(newWidth / boundsAspect)
+    } else {
+      // taller than target, adjust width
+      newWidth = Math.round(newHeight * boundsAspect)
+    }
+    logger.debug(`${newWidth}x${newHeight} ${xDiff}${yDiff} ${boundsAspect}`);
 
-  /*
-  // Location check
-  // Click the center of the screen, wait for a bit, then logs the "location" localStorage item to console
-  const centerPos = {x: Math.floor(newWidth / 2), y: Math.floor(newHeight / 2)}
-  await page.mouse.click(centerPos.x, centerPos.y)
-  await new Promise((r) => setTimeout(r, 400))
-  const loc = await devtools.send("Runtime.evaluate", {
-    expression: `localStorage.getItem("location")`
-  })
-  logger.info(`Captured ${m.img} at location ${loc.result.value}`),
-  await new Promise((r)=>setTimeout(r, 1000));
-  await page.locator("body div.absolute.bottom-0.left-0.z-50.w-full.sm\\:left-1\\/2.sm\\:max-w-md.sm\\:-translate-x-1\\/2.md\\:max-w-lg > div > div > div.flex.gap-2.px-3 > button").click()
-  */
+    await page.setViewport({width: newWidth, height: newHeight});
+
+    await canvasHandle!.screenshot({
+      // @ts-ignore
+      path: `${saveFolder}/${t}/${m.img}`
+    })
+
+    /*
+    // Location check
+    // Click the center of the screen, wait for a bit, then logs the "location" localStorage item to console
+    const centerPos = {x: Math.floor(newWidth / 2), y: Math.floor(newHeight / 2)}
+    await page.mouse.click(centerPos.x, centerPos.y)
+    await new Promise((r) => setTimeout(r, 400))
+    const loc = await devtools.send("Runtime.evaluate", {
+      expression: `localStorage.getItem("location")`
+    })
+    logger.info(`Captured ${m.img} at location ${loc.result.value}`),
+    await new Promise((r)=>setTimeout(r, 1000));
+    await page.locator("body div.absolute.bottom-0.left-0.z-50.w-full.sm\\:left-1\\/2.sm\\:max-w-md.sm\\:-translate-x-1\\/2.md\\:max-w-lg > div > div > div.flex.gap-2.px-3 > button").click()
+    */
+  }
 }
 } catch(e){
   // log the error
