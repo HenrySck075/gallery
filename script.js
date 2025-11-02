@@ -1,4 +1,6 @@
 (async ()=>{
+const WEBHOOK_WORKER = "https://yazawaliner.henrysck075.workers.dev/submit_image"
+
 const gallery = document.getElementById('gallery');
 // Get the dialog component directly
 const dialog = document.getElementById('image-dialog'); 
@@ -17,14 +19,12 @@ const m_tilePos = document.getElementById("tilePos");
 
 const full_version = window.location.pathname.endsWith("/world") && WORLD;
 
-const p = (str) => full_version ? `../${str}` : str;
-
-const sldata = (await (await fetch(p('assets/spotlight/items'))).text()).split("\n")
+const sldata = (await (await fetch('../assets/spotlight/items')).text()).split("\n")
 const spotlights = parseInt(sldata.shift());
 const spotlightIdx = Math.round(Math.random() * (spotlights - 1));
 
-document.documentElement.style.setProperty("--spotlight-background-landscape", `url("${p(`assets/spotlight/landscape/${sldata[spotlightIdx]}`)}")`)
-document.documentElement.style.setProperty("--spotlight-background-portrait", `url("${p(`assets/spotlight/portrait/${sldata[spotlights+spotlightIdx]}`)}")`)
+document.documentElement.style.setProperty("--spotlight-background-landscape", `url("../assets/spotlight/landscape/${sldata[spotlightIdx]}")`)
+document.documentElement.style.setProperty("--spotlight-background-portrait", `url("../assets/spotlight/portrait/${sldata[spotlights+spotlightIdx]}")`)
 
 // Load metadata
 fetch('metadata.json')
@@ -81,7 +81,7 @@ fetch('metadata.json')
       }
       // The image element
       const img = document.createElement('img');
-      img.src = p(`assets/thumbnails/${full_version ? 'world' : 'domestic'}/${item.img}`);
+      img.src = `../assets/thumbnails/${full_version ? 'world' : 'domestic'}/${item.img}`;
       img.alt = item.title;
       img.loading = "lazy";
       img.width = "100px";
@@ -103,7 +103,7 @@ fetch('metadata.json')
       }
 
       img.addEventListener('click', () => {
-        dialogImage.src = p(`assets/images/${full_version ? 'world' : 'domestic'}/${item.img}`);
+        dialogImage.src = `../assets/images/${full_version ? 'world' : 'domestic'}/${item.img}`;
         m_title.textContent = item.title;
         m_desc.textContent = item.description ?? "";
 
