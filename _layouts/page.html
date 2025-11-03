@@ -78,9 +78,12 @@
   {% endif %}
   <div style="max-width: 1200px; margin: 0 auto; padding: 24px; color: var(--colorNeutralForeground2);" class="bg">
     <fluent-text block style="text-align: center; margin: 20px 0;"><h1>{{ page.t }} Gallery</h1></fluent-text>
-    <fluent-text>Collection of arts around the {{ page.h }} that is safe enough to be put on GitHub i think and is also cool</fluent-text>
+    <fluent-text>{{ page.h }}</fluent-text>
     <fluent-text block style="padding-top: 4px;">
       Submit images through <a href="https://github.com/rinaboards/gallery/issues">the page's issues list</a> (see <a href="https://github.com/rinaboards/gallery/blob/master/CONTRIBUTING.md">here</a> for how to write an entry)
+    </fluent-text>
+    <fluent-text block>Or you can also do it
+      <fluent-button appearance="outline" id="submit-diag-open-btn">Here</fluent-button>
     </fluent-text>
     <fluent-text block data-lastupdated="{{UPLOAD_DATE}}" id="date">Last updated</fluent-text>
     <fluent-text block style="margin: 20px 0; font-size: 11px">
@@ -103,6 +106,7 @@
       <img id="dialog-image" src="" alt="Image" class="dialog-image">
       <div style="width: 100%;">
         <fluent-text block><h2 id="title"></h2></fluent-text>
+        <fluent-badge id="region"></fluent-badge>
         <fluent-text block id="desc"></fluent-text>
         <br>
         <fluent-text block id="tilePos"></fluent-text>
@@ -159,6 +163,30 @@
       <fluent-text-input id="submit-categories" placeholder="Categories (comma separated)" style="width: 100%; margin-top: 8px;">Categories</fluent-text-input>
 
       <fluent-button id="submit-submit-btn" appearance="accent" style="margin-top: 16px;">Submit</fluent-button>
+
+      <fluent-button
+        tabindex="0"
+        slot="close"
+        appearance="transparent"
+        icon-only
+        aria-label="close"
+      >
+        <svg
+          fill="currentColor"
+          aria-hidden="true"
+          width="20"
+          height="20"
+          viewBox="0 0 20 20"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m4.09 4.22.06-.07a.5.5 0 0 1 .63-.06l.07.06L10 9.29l5.15-5.14a.5.5 0 0 1 .63-.06l.07.06c.18.17.2.44.06.63l-.06.07L10.71 10l5.14 5.15c.18.17.2.44.06.63l-.06.07a.5.5 0 0 1-.63.06l-.07-.06L10 10.71l-5.15 5.14a.5.5 0 0 1-.63.06l-.07-.06a.5.5 0 0 1-.06-.63l.06-.07L9.29 10 4.15 4.85a.5.5 0 0 1-.06-.63l.06-.07-.06.07Z"
+            fill="currentColor"
+          ></path>
+        </svg>
+      </fluent-button>
+
+
     </fluent-dialog-body>
   </fluent-dialog>
 

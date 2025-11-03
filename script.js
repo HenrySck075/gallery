@@ -1,3 +1,25 @@
+
+import { FluentDesignSystem, DialogBodyDefinition, ButtonDefinition, DialogDefinition, TextDefinition, LabelDefinition, DropdownDefinition, DropdownOptionDefinition, ListboxDefinition, setTheme } from '@fluentui/web-components';
+import { webDarkTheme } from "@fluentui/tokens";
+
+
+setTheme(webDarkTheme)
+
+for (const d of [
+  DialogBodyDefinition,
+  ButtonDefinition,
+  DialogDefinition,
+  TextDefinition,
+  LabelDefinition,
+  DropdownDefinition,
+  DropdownOptionDefinition,
+  ListboxDefinition
+]) {
+  d.define(FluentDesignSystem.registry)
+}
+
+import { decode } from "@msgpack/msgpack";
+
 (async ()=>{
 const WEBHOOK_WORKER = "https://yazawaliner.henrysck075.workers.dev/submit_image"
 
@@ -11,6 +33,7 @@ const redirectBtn = document.getElementById('redirect-btn');
 const m_title = document.getElementById("title");
 const m_desc = document.getElementById("desc");
 const m_tilePos = document.getElementById("tilePos");
+const m_region = document.getElementById("region")
 
 {
   const date = document.getElementById("date");
@@ -26,10 +49,52 @@ const spotlightIdx = Math.round(Math.random() * (spotlights - 1));
 document.documentElement.style.setProperty("--spotlight-background-landscape", `url("../assets/spotlight/landscape/${sldata[spotlightIdx]}")`)
 document.documentElement.style.setProperty("--spotlight-background-portrait", `url("../assets/spotlight/portrait/${sldata[spotlights+spotlightIdx]}")`)
 
+const regionMaps = decode(await (await fetch("../assets/regionMaps")).arrayBuffer());
+const folder = full_version ? 'world' : 'domestic'
+
+const submit_dialog = document.getElementById("submit-dialog")
+document.getElementById("submit-diag-open-btn").addEventListener("click", ()=>{
+  submit_dialog.show();
+});
+
+const submit_btn = document.getElementById("submit-submit-btn");
+submit_btn.addEventListener("click", ()=>{
+  const title = document.getElementById("submit-title").value;
+  const description = document.getElementById("submit-desc").value;
+  const filename = document.getElementById("submit-filename").value;
+  const coordX = parseFloat(document.getElementById("submit-coord-x").value);
+  const coordY = parseFloat(document.getElementById("submit-coord-y").value);
+  const categories = document.getElementById("submit-categories").value.split(",").map((v)=>v.trim()).filter((v)=>v.length > 0);
+
+  if (!title || !description || !filename || isNaN(coordX) || isNaN(coordY)) {
+    alert("Please fill in all required fields.");
+    return;
+  }
+
+  const payload = {
+    file: filename,
+    title: title,
+    description: description,
+    coordinate: [coordY, coordX],
+    categories: categories
+  };
+
+  submit_btn.disabled = true;
+  fetch(WEBHOOK_WORKER, {
+    method: "POST",
+    body: payload
+  }).then((v)=>{
+    submit_btn.disabled = false;
+    submit_dialog.hide()
+  })
+
+})
+
 // Load metadata
-fetch('metadata.json')
-  .then(response => response.json())
-  .then(data => {
+fetch('metadata.mpk')
+  .then(response => response.arrayBuffer())
+  .then(msg => {
+    const data = decode(msg);
     // collect all categories
     const categories = new Set(data.map((v)=>v.categories??[]).flat());
     console.log(categories)
@@ -81,7 +146,7 @@ fetch('metadata.json')
       }
       // The image element
       const img = document.createElement('img');
-      img.src = `../assets/thumbnails/${full_version ? 'world' : 'domestic'}/${item.img}`;
+      img.src = `../assets/thumbnails/${folder}/${item.img}`;
       img.alt = item.title;
       img.loading = "lazy";
       img.width = "100px";
@@ -103,9 +168,10 @@ fetch('metadata.json')
       }
 
       img.addEventListener('click', () => {
-        dialogImage.src = `../assets/images/${full_version ? 'world' : 'domestic'}/${item.img}`;
+        dialogImage.src = `../assets/images/${folder}/${item.img}`;
         m_title.textContent = item.title;
         m_desc.textContent = item.description ?? "";
+        m_region.textContent = regionMaps[folder][item.img];
 
         const tilePos = mercUtil.latLonToTileAndPixel(llp[0], llp[1], 11)
 

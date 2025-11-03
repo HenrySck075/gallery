@@ -1,7 +1,7 @@
 import fs from 'fs'
 
-const metadataFile = process.argv[2]
-const worldMetadataFile = process.argv[3]
+const metadataFile = "../domestic/metadata.json"
+const worldMetadataFile = "../world/metadata.json"
 const saveFolder = "assets/images/"
 // check both's existence before continuing
 if (!fs.existsSync(metadataFile)) {
@@ -42,7 +42,7 @@ l.configure({
 })
 
 const logger = l.getLogger()
-logger.level = process.argv[4] ?? "INFO"
+logger.level = process.argv[2] ?? "INFO"
 
 const CHROMIUM_PATH = process.env.CHROMIUM_PATH
 
@@ -66,6 +66,7 @@ const browser: Browser = await puppeteer.launch({
 
 import UserAgents from "user-agents"
 import { MercatorUtils } from './mercator_util.mjs'
+import { encode } from '@msgpack/msgpack'
 
 const page = await browser.newPage()
 page.setUserAgent({userAgent: (new UserAgents()).toString()})
@@ -216,6 +217,7 @@ function shuffleArray(array: any[]) {
 // actual work
 const metadata: Record<string, {
   img: string,
+  coordinate?: [number, number]
   bounds: [
     // topleft
     [number, number], 
@@ -226,6 +228,13 @@ const metadata: Record<string, {
   domestic: shuffleArray(JSON.parse(fs.readFileSync(metadataFile).toString("utf-8"))),
   world: shuffleArray(JSON.parse(fs.readFileSync(worldMetadataFile).toString("utf-8")))
 }
+
+// Record of region display strings ("${flag} ${city}, ${country}") for each image from each folders
+// Record<folder, Record<imgfilename, regionDisplayText>>
+const regionMaps: Record<string, Record<string, string>> = {}
+const countryInfos: {
+  id:number,name:string,code:string,flag:string
+}[] = JSON.parse(fs.readFileSync("literally.json").toString("utf-8"))
 
 
 logger.info("Capturing images")
@@ -272,8 +281,14 @@ for (const t of Object.keys(metadata)) {
   }
 }
 
+// assuming the values inside the array supports that operation and the sizes are the same
+function subtractArray<T>(a: T[], b: T[]) {
+  return a.map((v, i)=> (v as any) - (b[i] as any)) as T[]
+}
+
 const mercUtil = new MercatorUtils(1000)
 for (const [t, met] of Object.entries(metadata)) {
+  regionMaps[t] = {}
   for (const m of met) {
     logger.debug(`${m.img} ${m.bounds}`)
     // run ${__maplibre_map}.fitBounds(m.bounds, {animate: false}) and wait for 2s
@@ -312,21 +327,30 @@ for (const [t, met] of Object.entries(metadata)) {
       path: `${saveFolder}/${t}/${m.img}`
     })
 
-    /*
-    // Location check
-    // Click the center of the screen, wait for a bit, then logs the "location" localStorage item to console
-    const centerPos = {x: Math.floor(newWidth / 2), y: Math.floor(newHeight / 2)}
-    await page.mouse.click(centerPos.x, centerPos.y)
-    await new Promise((r) => setTimeout(r, 400))
-    const loc = await devtools.send("Runtime.evaluate", {
-      expression: `localStorage.getItem("location")`
-    })
-    logger.info(`Captured ${m.img} at location ${loc.result.value}`),
-    await new Promise((r)=>setTimeout(r, 1000));
-    await page.locator("body div.absolute.bottom-0.left-0.z-50.w-full.sm\\:left-1\\/2.sm\\:max-w-md.sm\\:-translate-x-1\\/2.md\\:max-w-lg > div > div > div.flex.gap-2.px-3 > button").click()
-    */
+    const centerCoord = mercUtil.latLonToTileAndPixel(...(m.coordinate ?? subtractArray(m.bounds[1],m.bounds[0]).reverse()))
+
+    const u = `https://backend.wplace.live/s0/pixel/${centerCoord.tile[0]}/${centerCoord.tile[1]}?x=${centerCoord.pixel[0]}&y=${centerCoord.pixel[1]}`
+    
+    // ask the browser to send the request and save the response into info
+    const info: {
+      region: {
+        cityId: number,
+        countryId: number,
+        id: number, // wtf???
+        name: string,
+        number: number // rank?
+      }
+    } = await page.evaluate(async (url)=>{
+      const resp = await fetch(url);
+      return resp.json();
+    }, u);
+    const countryInfo = countryInfos.find(c=>c.id===info.region.countryId);
+    regionMaps[t][m.img] = `${countryInfo?.flag ?? ""} ${info.region.name}, ${countryInfo?.name ?? "idk man"}`
   }
 }
+
+fs.writeFileSync("assets/regionMaps",encode(regionMaps))
+
 } catch(e){
   // log the error
   logger.fatal("An error occurred: ", e)

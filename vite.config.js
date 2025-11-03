@@ -9,7 +9,7 @@ export default defineConfig({
         "assets/fluent.js",
       ],
       input: {
-        fluent: 'fluent-setup.js',
+        script: 'script.js',
       },
       output: {
         entryFileNames: 'assets/[name].js',

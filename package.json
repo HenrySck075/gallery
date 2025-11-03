@@ -9,7 +9,8 @@
   },
   "dependencies": {
     "@fluentui/tokens": "^1.0.0-alpha.22",
-    "@fluentui/web-components": "^3.0.0-beta.130"
+    "@fluentui/web-components": "^3.0.0-beta.130",
+    "@msgpack/msgpack": "^3.1.2"
   },
   "devDependencies": {
     "vite": "^4.0.0"
