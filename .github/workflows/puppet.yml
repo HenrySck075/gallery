@@ -167,12 +167,14 @@ jobs:
         with: 
           source: 'assets/images/domestic'
           output: 'assets/thumbnails/domestic'
+          subfolder: false
           sizes: 480
       - name: World assets generation
         uses: subic/ghaction-thumbnails@master
         with: 
           source: 'assets/images/world'
           output: 'assets/thumbnails/world'
+          subfolder: false
           sizes: 480
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -247,7 +249,7 @@ jobs:
             }
           
       - name: "that one step to replace {{UPLOAD_DATE}} in index.html to the actual date"
-        run: sed -i "s/{{UPLOAD_DATE}}/${{ steps.find_images_date.outputs.latest_upload_date }}/g" index.html
+        run: sed -i "s/{{UPLOAD_DATE}}/${{ steps.find_images_date.outputs.latest_upload_date }}/g" _layouts/page.html
 
       - name: Build with Jekyll
         uses: actions/jekyll-build-pages@v1

@@ -139,7 +139,7 @@
   <!--Submission dialog-->
   <fluent-dialog id="submit-dialog">
     <fluent-dialog-body>
-      <fluent-text block><h2>Submit an Image</h2></fluent-text>
+      <h2 slot="title">Submit an Image</h2>
       <fluent-text block>
         Before submit an image, ensure it meets the submission guidelines (The <a href="https://docs.github.com/en/site-policy">GitHub site policy</a>.)</li>
       </fluent-text>
@@ -156,12 +156,13 @@
       <fluent-textarea required id="submit-desc" placeholder="meow">Description</fluent-textarea>
       <fluent-text-input id="submit-filename" placeholder="hallo.png" style="width: 100%; margin-top: 8px;">Filename</fluent-text-input>
       <div style="display: flex; flex-direction: row; gap: 8px; margin-top: 8px;">
-        <fluent-text-input required type="tel" id="submit-coord-x" placeholder="X Coordinate" style="flex: 1;">X Coordinate</fluent-text-input>
-        <fluent-text-input required type="tel" id="submit-coord-y" placeholder="Y Coordinate" style="flex: 1;">Y Coordinate</fluent-text-input>
+        <fluent-text-input required type="tel" id="submit-coord-lat" placeholder="Latitude" style="flex: 1;">Latitude</fluent-text-input>
+        <fluent-text-input required type="tel" id="submit-coord-lng" placeholder="Longitude" style="flex: 1;">Longitude</fluent-text-input>
       </div>
       <fluent-text-input id="submit-categories" placeholder="Categories (comma separated)" style="width: 100%; margin-top: 8px;">Categories</fluent-text-input>
 
       <fluent-button id="submit-submit-btn" appearance="accent" style="margin-top: 16px;">Submit</fluent-button>
+      <fluent-text id="submit-error-text" style="color: red; display: none;"></fluent-text>
 
       <fluent-button
         tabindex="0"

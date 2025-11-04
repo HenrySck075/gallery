@@ -1,5 +1,5 @@
 
-import { FluentDesignSystem, DialogBodyDefinition, ButtonDefinition, DialogDefinition, TextDefinition, LabelDefinition, DropdownDefinition, DropdownOptionDefinition, ListboxDefinition, setTheme } from '@fluentui/web-components';
+import { FluentDesignSystem, DialogBodyDefinition, ButtonDefinition, DialogDefinition, TextDefinition, LabelDefinition, DropdownDefinition, DropdownOptionDefinition, ListboxDefinition, TextInputDefinition, TextAreaDefinition, BadgeDefinition, setTheme } from '@fluentui/web-components';
 import { webDarkTheme } from "@fluentui/tokens";
 
 
@@ -13,7 +13,10 @@ for (const d of [
   LabelDefinition,
   DropdownDefinition,
   DropdownOptionDefinition,
-  ListboxDefinition
+  ListboxDefinition,
+  TextAreaDefinition,
+  TextInputDefinition,
+  BadgeDefinition
 ]) {
   d.define(FluentDesignSystem.registry)
 }
@@ -38,10 +41,10 @@ const m_region = document.getElementById("region")
 
 {
   const date = document.getElementById("date");
-  date.textContent += (new Date(date.dataset.lastupdated)).toDateString()
+  date.textContent += " "+ (new Date(date.dataset.lastupdated)).toDateString()
 }
 
-const full_version = window.location.pathname.endsWith("/world") && WORLD;
+const full_version = window.location.pathname.endsWith("/world/") && WORLD;
 
 const sldata = (await (await fetch('../assets/spotlight/items')).text()).split("\n")
 const spotlights = parseInt(sldata.shift());
@@ -51,11 +54,14 @@ document.documentElement.style.setProperty("--spotlight-background-landscape", `
 document.documentElement.style.setProperty("--spotlight-background-portrait", `url("../assets/spotlight/portrait/${sldata[spotlights+spotlightIdx]}")`)
 
 const regionMaps = decode(await (await fetch("../assets/regionMaps")).arrayBuffer());
-const folder = full_version ? 'world' : 'domestic'
+// this is the last path segment
+const folder = window.location.pathname.split("/").filter((v)=>v.length>0).pop();
 
 const submit_dialog = document.getElementById("submit-dialog")
+const submit_error_text = document.getElementById("submit-error-text");
 document.getElementById("submit-diag-open-btn").addEventListener("click", ()=>{
   submit_dialog.show();
+  submit_error_text.style.display = "none";
 });
 
 const submit_btn = document.getElementById("submit-submit-btn");
@@ -63,8 +69,8 @@ submit_btn.addEventListener("click", ()=>{
   const title = document.getElementById("submit-title").value;
   const description = document.getElementById("submit-desc").value;
   const filename = document.getElementById("submit-filename").value;
-  const coordX = parseFloat(document.getElementById("submit-coord-x").value);
-  const coordY = parseFloat(document.getElementById("submit-coord-y").value);
+  const coordLat = parseFloat(document.getElementById("submit-coord-lat").value);
+  const coordLng = parseFloat(document.getElementById("submit-coord-lng").value);
   const categories = document.getElementById("submit-categories").value.split(",").map((v)=>v.trim()).filter((v)=>v.length > 0);
 
   if (!title || !description || !filename || isNaN(coordX) || isNaN(coordY)) {
@@ -76,17 +82,23 @@ submit_btn.addEventListener("click", ()=>{
     file: filename,
     title: title,
     description: description,
-    coordinate: [coordY, coordX],
-    categories: categories
+    coordinate: [coordLat, coordLng],
+    categories: categories,
+    world: full_version
   };
 
   submit_btn.disabled = true;
   fetch(WEBHOOK_WORKER, {
-    method: "POST",
-    body: payload
-  }).then((v)=>{
+    method: "POST", 
+    body: JSON.stringify(payload)
+  }).then(async (v)=>{
     submit_btn.disabled = false;
-    submit_dialog.hide()
+    if (v.ok) {
+      submit_dialog.hide();
+    } else {
+      submit_error_text.style.display = "block";
+      submit_error_text.textContent = await v.text();
+    }
   })
 
 })
