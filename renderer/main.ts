@@ -327,7 +327,7 @@ for (const [t, met] of Object.entries(metadata)) {
       path: `${saveFolder}/${t}/${m.img}`
     })
 
-    const centerCoord = mercUtil.latLonToTileAndPixel(...(m.coordinate ?? subtractArray(m.bounds[1],m.bounds[0]).reverse()))
+    const centerCoord = mercUtil.latLonToTileAndPixel(...(m.coordinate ?? subtractArray(m.bounds[1],m.bounds[0]).reverse()),11)
 
     const u = `https://backend.wplace.live/s0/pixel/${centerCoord.tile[0]}/${centerCoord.tile[1]}?x=${centerCoord.pixel[0]}&y=${centerCoord.pixel[1]}`
     
@@ -342,7 +342,9 @@ for (const [t, met] of Object.entries(metadata)) {
       }
     } = await page.evaluate(async (url)=>{
       const resp = await fetch(url);
-      return resp.json();
+      const respBody = await resp.text();
+      console.log(respBody);
+      return JSON.parse(respBody);
     }, u);
     const countryInfo = countryInfos.find(c=>c.id===info.region.countryId);
     regionMaps[t][m.img] = `${countryInfo?.flag ?? ""} ${info.region.name}, ${countryInfo?.name ?? "idk man"}`
