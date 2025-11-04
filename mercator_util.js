@@ -1,5 +1,5 @@
 const Yo = 2 * Math.PI * 6378137 / 2;
-class MercatorUtils {
+export class MercatorUtils {
     constructor(a=256) {
         this.tileSize = a,
         this.initialResolution = 2 * Yo / this.tileSize

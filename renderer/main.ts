@@ -281,10 +281,6 @@ for (const t of Object.keys(metadata)) {
   }
 }
 
-// assuming the values inside the array supports that operation and the sizes are the same
-function subtractArray<T>(a: T[], b: T[]) {
-  return a.map((v, i)=> (v as any) - (b[i] as any)) as T[]
-}
 
 const mercUtil = new MercatorUtils(1000)
 for (const [t, met] of Object.entries(metadata)) {
@@ -327,7 +323,14 @@ for (const [t, met] of Object.entries(metadata)) {
       path: `${saveFolder}/${t}/${m.img}`
     })
 
-    const centerCoord = mercUtil.latLonToTileAndPixel(...(m.coordinate ?? subtractArray(m.bounds[1],m.bounds[0]).reverse()),11)
+    const bounds = m.bounds;
+    const sw = bounds[0];
+    const ne = bounds[1];
+    // Because the coordinate array are reversed above
+    const centerLng = (sw[1] + ne[1]) / 2;
+    const centerLat = (sw[0] + ne[0]) / 2;
+    const centerCoord = mercUtil.latLonToTileAndPixel(centerLat, centerLng,11)
+    console.log(centerCoord)
 
     const u = `https://backend.wplace.live/s0/pixel/${centerCoord.tile[0]}/${centerCoord.tile[1]}?x=${centerCoord.pixel[0]}&y=${centerCoord.pixel[1]}`
     
