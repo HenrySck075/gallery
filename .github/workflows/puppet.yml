@@ -270,6 +270,7 @@ jobs:
         run: node tools/msgpacker.js
       - name: Delete irrelevant files
         run: rm -rf tools renderer Dockerfile vite.config.js package.json package-lock.json
+        working-directory: _site
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
 
