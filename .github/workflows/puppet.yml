@@ -39,7 +39,7 @@ jobs:
   build-and-push-image:
     runs-on: ubuntu-latest
     needs: filter
-    if: needs.filter.outputs.docker_build == 'true' || inputs.force_rebuild_docker == 'true'
+    if: (needs.filter.outputs.docker_build == 'true' || inputs.force_rebuild_docker == 'true') && github.event_name != "schedule"
     permissions:
       contents: read
       packages: write # Required to push to GitHub Container Registry
@@ -187,7 +187,7 @@ jobs:
             const owner = context.repo.owner;
             const repo = context.repo.repo;
             const workflowFile = 'puppet.yml';
-            const artifactName = 'images';
+            const artifactName = 'wplace-images';
 
             let latestUploadDate = null;
             let page = 1;
