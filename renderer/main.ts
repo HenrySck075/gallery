@@ -176,7 +176,7 @@ await page.goto("https://wplace.live")
 if (process.env.ENABLE_RECORDING)
   rec = await page.screencast({path: "debug/r.webm", format: "webm"})
 
-await sleep(4000);
+await sleep(10000);
 logger.debug("g");
 // shift+left drag by a large distance randomly to trigger the breakpoint
 await page.keyboard.down("Shift")
