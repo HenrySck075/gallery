@@ -48,7 +48,12 @@ const m_region = document.getElementById("region")
 
 {
   const ps = document.getElementById("page-switcher");
+  let dontcare = true;
   ps.addEventListener("change", ()=>{
+    if (dontcare) {
+      dontcare = false;
+      return;
+    }
     location.href = ps.activeid == "ps-yl" ? "../domestic" : "../world";
   })
 }
