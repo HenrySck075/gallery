@@ -189,7 +189,7 @@ try{
     logger.debug("Trigger map() function call (1/2): Search menu")
     await h.click();
     // The second layer
-    const j = await page.locator("button.tooltip.btn[data-tip=\"Random place\"]").waitHandle();
+    const j = await page.locator("dialog.modal.duration-0[open] > div > section.grow.overflow-y-auto.overflow-x-hidden.pb-3.pt-4 > div.mb-2.flex.items-center.justify-between.px-4 > ::-p-text(Recent) ~ button.btn").waitHandle();
     setTimeout(async ()=>{
       logger.debug("Trigger map() function call (2/2): Random place button")
       await j.click();
