@@ -58,7 +58,7 @@ puppeteer.use(puppetstealth())
 
 logger.info("Starting browser...")
 const browser: Browser = await puppeteer.launch({
-  //headless: true,
+  headless: true,
   executablePath: CHROMIUM_PATH,
   args: [/*'--no-sandbox', */'--force-prefers-reduced-motion', /*...(process.env.ANDROID_ROOT==="/system" ? ['--disable-gpu'] : []), ...(process.env.WEBGL_WORKAROUND ? ['--use-gl=egl', '--disable-webgl-image-chromium', '--disable-gpu-compositing', '--disable-dev-shm-usage'] : [])*/]
 })
@@ -114,19 +114,12 @@ devtools.on("Debugger.scriptParsed", (p)=>{
 
   // Find the position after "{get map(){return " (before the return) in the src
   devtools.send("Debugger.getScriptSource", {scriptId: p.scriptId}).then(async (src)=>{
-    const index = src.scriptSource.indexOf("{get map(){return ")
+    const index = src.scriptSource.indexOf("}_fitInternal(")
     if (index === -1) return;
 
-    const pos = index + "{get map(){".length
-    const rvPos = index + "{get map(){return ".length
+    const pos = src.scriptSource.indexOf("{", index + "}_fitInternal(".length)+1;
 
-    // after rvPos is the returning value, 
-
-    // store the text after rvPos and before the immediate next } (theres only one of them before the function ends)
-    const endPos = src.scriptSource.indexOf("}", rvPos)
-    const returnValue = src.scriptSource.slice(rvPos, endPos).trim()
-
-    const copier = `window.${mapobj_name} = ${returnValue}`
+    const copier = `window.${mapobj_name} = this`
 
     const lineNumber = src.scriptSource.slice(0, pos).split("\n").length - 1
     const columnNumber = pos - src.scriptSource.lastIndexOf("\n", pos) - 1
@@ -182,26 +175,24 @@ devtools.on("Debugger.scriptParsed", (p)=>{
 await page.goto("https://wplace.live")
 if (process.env.ENABLE_RECORDING)
   rec = await page.screencast({path: "debug/r.webm", format: "webm"})
-try{
-  const h = await page.locator("div#map ~ div > div button[title=Search]").waitHandle()
-  // wait for a random good delay before clicking
-  setTimeout(async ()=>{
-    logger.debug("Trigger map() function call (1/2): Search menu")
-    await h.click();
-    // The second layer
-    const j = await page.locator("dialog.modal.duration-0[open] > div > section.grow.overflow-y-auto.overflow-x-hidden.pb-3.pt-4 > div.mb-2.flex.items-center.justify-between.px-4 > ::-p-text(Recent) ~ button.btn").waitHandle();
-    setTimeout(async ()=>{
-      logger.debug("Trigger map() function call (2/2): Random place button")
-      await j.click();
-    }, 1000 + Math.random() * 2000)
-  }, 2000 + Math.random() * 2000)
-} catch(v){
-  logger.fatal("Cannot locate the explore button, probably the map is unable to be initialized?")
-  throw "exit"
-}
+
+await sleep(4000);
+logger.debug("g");
+// shift+left drag by a large distance randomly to trigger the breakpoint
+await page.keyboard.down("Shift")
+const startX = 400 + Math.random() * 800
+const startY = 300 + Math.random() * 400
+const endX = startX + (Math.random() - 0.5) * 1000
+const endY = startY + (Math.random() - 0.5) * 600
+await page.mouse.move(startX, startY)
+await page.mouse.down()
+await page.mouse.move(endX, endY, {steps: 20})
+await page.mouse.up()
+await page.keyboard.up("Shift")
+
 // Eternally waits until maplibre_map_extracted is true
 while (!maplibre_map_extracted) {
-  await sleep(100)
+  await sleep(100);
 }
 
 // disable debugger again we dont need it
@@ -318,7 +309,7 @@ for (const m of metadata) {
 
   await canvasHandle!.screenshot({
     // @ts-ignore
-    path: `${saveFolder}/${t}/${m.img}`
+    path: `${saveFolder}/${m.img}`
   })
 
   const bounds = m.bounds;
@@ -344,7 +335,6 @@ for (const m of metadata) {
   } = await page.evaluate(async (url)=>{
     const resp = await fetch(url);
     const respBody = await resp.text();
-    console.log(respBody);
     return JSON.parse(respBody);
   }, u);
   const countryInfo = countryInfos.find(c=>c.id===info.region.countryId);
