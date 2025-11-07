@@ -6,5 +6,25 @@
       [105.91268521552732, 21.155746873645484],
       [105.96225552802736, 21.10573853861419]
     ]
+  },
+  {
+    "img": "midomination.png",
+    "title": "Midomination",
+    "description": "we need all goodies related to her being made of eco-friendly materials because funny haha",
+    "bounds": [
+      [136.29418912177732, 36.77599355209742],
+      [136.37487271552732, 36.738673090905706]
+    ]
+  },
+  {
+    "img": "nesonosora.png",
+    "title": "Nesonosora High School Idol Club",
+    "description": "(feat. Takasaki \"collect my yuri\" Yuu)",
+    "zoom": 14.180726372239347,
+    "coordinate": [36.66848968216222, 136.46557584052732],
+    "bounds": [
+      [136.44290005927735,36.69837479058192],
+      [136.5038961530273,36.66510573070558]
+    ]
   }
 ]

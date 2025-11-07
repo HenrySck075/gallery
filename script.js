@@ -201,7 +201,7 @@ fetch('metadata.mpk')
         m_tilePos.innerHTML = `Tx: ${tilePos.tile[0]}, Ty: ${tilePos.tile[1]}, Px: ${tilePos.pixel[0]}, Py: ${tilePos.pixel[1]}<br/>C: ${llp}`
         
         redirectBtn.onclick = () => {
-          window.location.href = `https://wplace.live/?lat=${llp[0]}&lng=${llp[1]}&zoom=${item.zoom??1}`;
+          window.location.href = `https://wplace.live/?lat=${llp[0]}&lng=${llp[1]}&zoom=${item.zoom??12}`;
         };
 
         dialog.show();
