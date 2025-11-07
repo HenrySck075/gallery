@@ -1,5 +1,5 @@
 
-import { FluentDesignSystem, DialogBodyDefinition, ButtonDefinition, DialogDefinition, TextDefinition, LabelDefinition, DropdownDefinition, DropdownOptionDefinition, ListboxDefinition, TextInputDefinition, TextAreaDefinition, BadgeDefinition, setTheme } from '@fluentui/web-components';
+import { FluentDesignSystem, DialogBodyDefinition, ButtonDefinition, DialogDefinition, TextDefinition, LabelDefinition, DropdownDefinition, DropdownOptionDefinition, ListboxDefinition, TextInputDefinition, TextAreaDefinition, BadgeDefinition, TablistDefinition, setTheme, TabDefinition } from '@fluentui/web-components';
 import { webDarkTheme } from "@fluentui/tokens";
 
 
@@ -16,7 +16,9 @@ for (const d of [
   ListboxDefinition,
   TextAreaDefinition,
   TextInputDefinition,
-  BadgeDefinition
+  BadgeDefinition,
+  TablistDefinition,
+  TabDefinition
 ]) {
   d.define(FluentDesignSystem.registry)
 }
@@ -42,6 +44,13 @@ const m_region = document.getElementById("region")
 {
   const date = document.getElementById("date");
   date.textContent += " "+ (new Date(date.dataset.lastupdated)).toDateString()
+}
+
+{
+  const ps = document.getElementById("page-switcher");
+  ps.addEventListener("change", ()=>{
+    location.href = ps.activeid == "ps-yl" ? "../domestic" : "../world";
+  })
 }
 
 const full_version = window.location.pathname.endsWith("/world/") && WORLD;
