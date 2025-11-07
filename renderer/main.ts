@@ -1,8 +1,7 @@
 import fs from 'fs'
 
-const metadataFile = "../domestic/metadata.json"
-const worldMetadataFile = "../world/metadata.json"
-const saveFolder = "assets/images/"
+const metadataFile = process.env[2]!
+const saveFolder = `images`
 // check both's existence before continuing
 if (!fs.existsSync(metadataFile)) {
   console.error(`Metadata file ${metadataFile} does not exist.`)
@@ -215,7 +214,7 @@ function shuffleArray(array: any[]) {
 }
 
 // actual work
-const metadata: Record<string, {
+const metadata: {
   img: string,
   coordinate?: [number, number]
   bounds: [
@@ -224,14 +223,11 @@ const metadata: Record<string, {
     // bottomright
     [number, number]
   ]
-}[]> = {
-  domestic: shuffleArray(JSON.parse(fs.readFileSync(metadataFile).toString("utf-8"))),
-  world: shuffleArray(JSON.parse(fs.readFileSync(worldMetadataFile).toString("utf-8")))
-}
+}[] = shuffleArray(JSON.parse(fs.readFileSync(metadataFile).toString("utf-8")));
 
-// Record of region display strings ("${flag} ${city}, ${country}") for each image from each folders
-// Record<folder, Record<imgfilename, regionDisplayText>>
-const regionMaps: Record<string, Record<string, string>> = {}
+// Record of region display strings ("${flag} ${city}, ${country}") for each image 
+// Record<imgfilename, regionDisplayText>
+const regionMaps: Record<string, string> = {}
 const countryInfos: {
   id:number,name:string,code:string,flag:string
 }[] = JSON.parse(fs.readFileSync("literally.json").toString("utf-8"))
@@ -274,87 +270,82 @@ if (canvasHandle) {
 }
 
 // Create all save folders
-for (const t of Object.keys(metadata)) {
-  const folderPath = `${saveFolder}/${t}`
-  if (!fs.existsSync(folderPath)) {
-    fs.mkdirSync(folderPath, {recursive: true})
-  }
+const folderPath = saveFolder
+if (!fs.existsSync(folderPath)) {
+  fs.mkdirSync(folderPath, {recursive: true})
 }
 
 
 const mercUtil = new MercatorUtils(1000)
-for (const [t, met] of Object.entries(metadata)) {
-  regionMaps[t] = {}
-  for (const m of met) {
-    logger.debug(`${m.img} ${m.bounds}`)
-    // run ${__maplibre_map}.fitBounds(m.bounds, {animate: false}) and wait for 2s
-    await page.setViewport({width: 1920, height: 1080})
-    const expression = `window.${mapobj_name}.resize();await new Promise((r)=>setTimeout(r,500));window.${mapobj_name}.fitBounds(${JSON.stringify(m.bounds)}, {animate: false, duration: 0})`
-    await devtools.send("Runtime.evaluate", {
-      expression,
-      replMode: true
-    })
-    // give it some time to download stuff
-    await sleep(1600)
+for (const m of metadata) {
+  logger.debug(`${m.img} ${m.bounds}`)
+  // run ${__maplibre_map}.fitBounds(m.bounds, {animate: false}) and wait for 2s
+  await page.setViewport({width: 1920, height: 1080})
+  const expression = `window.${mapobj_name}.resize();await new Promise((r)=>setTimeout(r,500));window.${mapobj_name}.fitBounds(${JSON.stringify(m.bounds)}, {animate: false, duration: 0})`
+  await devtools.send("Runtime.evaluate", {
+    expression,
+    replMode: true
+  })
+  // give it some time to download stuff
+  await sleep(1600)
 
-    // figure out the aspect ratio of the bounds and calculate the new viewport width/height depending on whichever other axis is larger
-    const pxCoordSW = mercUtil.latLonToPixels(...m.bounds[0].reverse(),11)
-    const pxCoordNE = mercUtil.latLonToPixels(...m.bounds[1].reverse(),11)
-    const yDiff = Math.abs(pxCoordSW[1] - pxCoordNE[1])
-    const xDiff = Math.abs(pxCoordSW[0] - pxCoordNE[0])
-    let newWidth = 1920
-    let newHeight = 1080
-    const targetAspect = 1920 / 1080
-    const boundsAspect = xDiff / yDiff
-    if (boundsAspect > targetAspect) {
-      // wider than target, adjust height
-      // TODO: better way to calculate the height
-      newHeight = Math.round(newWidth / boundsAspect)
-    } else {
-      // taller than target, adjust width
-      newWidth = Math.round(newHeight * boundsAspect)
-    }
-    logger.debug(`${newWidth}x${newHeight} ${xDiff}${yDiff} ${boundsAspect}`);
-
-    await page.setViewport({width: newWidth, height: newHeight});
-
-    await canvasHandle!.screenshot({
-      // @ts-ignore
-      path: `${saveFolder}/${t}/${m.img}`
-    })
-
-    const bounds = m.bounds;
-    const sw = bounds[0];
-    const ne = bounds[1];
-    // Because the coordinate array are reversed above
-    const centerLng = (sw[1] + ne[1]) / 2;
-    const centerLat = (sw[0] + ne[0]) / 2;
-    const centerCoord = mercUtil.latLonToTileAndPixel(centerLat, centerLng,11)
-    console.log(centerCoord)
-
-    const u = `https://backend.wplace.live/s0/pixel/${centerCoord.tile[0]}/${centerCoord.tile[1]}?x=${centerCoord.pixel[0]}&y=${centerCoord.pixel[1]}`
-    
-    // ask the browser to send the request and save the response into info
-    const info: {
-      region: {
-        cityId: number,
-        countryId: number,
-        id: number, // wtf???
-        name: string,
-        number: number // rank?
-      }
-    } = await page.evaluate(async (url)=>{
-      const resp = await fetch(url);
-      const respBody = await resp.text();
-      console.log(respBody);
-      return JSON.parse(respBody);
-    }, u);
-    const countryInfo = countryInfos.find(c=>c.id===info.region.countryId);
-    regionMaps[t][m.img] = `${countryInfo?.flag ?? ""} ${info.region.name}, ${countryInfo?.name ?? "idk man"}`
+  // figure out the aspect ratio of the bounds and calculate the new viewport width/height depending on whichever other axis is larger
+  const pxCoordSW = mercUtil.latLonToPixels(...m.bounds[0].reverse(),11)
+  const pxCoordNE = mercUtil.latLonToPixels(...m.bounds[1].reverse(),11)
+  const yDiff = Math.abs(pxCoordSW[1] - pxCoordNE[1])
+  const xDiff = Math.abs(pxCoordSW[0] - pxCoordNE[0])
+  let newWidth = 1920
+  let newHeight = 1080
+  const targetAspect = 1920 / 1080
+  const boundsAspect = xDiff / yDiff
+  if (boundsAspect > targetAspect) {
+    // wider than target, adjust height
+    // TODO: better way to calculate the height
+    newHeight = Math.round(newWidth / boundsAspect)
+  } else {
+    // taller than target, adjust width
+    newWidth = Math.round(newHeight * boundsAspect)
   }
+  logger.debug(`${newWidth}x${newHeight} ${xDiff}${yDiff} ${boundsAspect}`);
+
+  await page.setViewport({width: newWidth, height: newHeight});
+
+  await canvasHandle!.screenshot({
+    // @ts-ignore
+    path: `${saveFolder}/${t}/${m.img}`
+  })
+
+  const bounds = m.bounds;
+  const sw = bounds[0];
+  const ne = bounds[1];
+  // Because the coordinate array are reversed above
+  const centerLng = (sw[1] + ne[1]) / 2;
+  const centerLat = (sw[0] + ne[0]) / 2;
+  const centerCoord = mercUtil.latLonToTileAndPixel(centerLat, centerLng,11)
+  console.log(centerCoord)
+
+  const u = `https://backend.wplace.live/s0/pixel/${centerCoord.tile[0]}/${centerCoord.tile[1]}?x=${centerCoord.pixel[0]}&y=${centerCoord.pixel[1]}`
+  
+  // ask the browser to send the request and save the response into info
+  const info: {
+    region: {
+      cityId: number,
+      countryId: number,
+      id: number, // wtf???
+      name: string,
+      number: number // rank?
+    }
+  } = await page.evaluate(async (url)=>{
+    const resp = await fetch(url);
+    const respBody = await resp.text();
+    console.log(respBody);
+    return JSON.parse(respBody);
+  }, u);
+  const countryInfo = countryInfos.find(c=>c.id===info.region.countryId);
+  regionMaps[m.img] = `${countryInfo?.flag ?? ""} ${info.region.name}, ${countryInfo?.name ?? "idk man"}`
 }
 
-fs.writeFileSync("assets/regionMaps",encode(regionMaps))
+fs.writeFileSync(`${saveFolder}/regionMaps`,encode(regionMaps))
 
 } catch(e){
   // log the error

@@ -1,11 +1,11 @@
-import {writeFileSync, mkdirSync, appendFileSync} from "fs"
+import {writeFileSync, mkdirSync} from "fs"
 
 const j = await (await fetch("https://fd.api.iris.microsoft.com/v4/api/selection?&placement=88000820&bcnt=4&country=JP&locale=ja-JP&fmt=json")).json()
 //console.dir(j)
 const spotlightImages = (j).batchrsp.items;
 
-mkdirSync("./assets/spotlight/landscape", {recursive: true})
-mkdirSync("./assets/spotlight/portrait")
+mkdirSync("./spotlight/landscape", {recursive: true})
+mkdirSync("./spotlight/portrait")
 
 const files: [string[], string[]] = [
   [], // landscape
@@ -33,11 +33,11 @@ for (const spotlightImageData of spotlightImages) {
   const landscapeImageData = await (await fetch(landscapeImageUrl)).arrayBuffer()
   const portraitImageData = await (await fetch(portraitImageUrl)).arrayBuffer()
 
-  writeFileSync(`./assets/spotlight/landscape/${landscapeImageFilename}`, Buffer.from(landscapeImageData))
-  writeFileSync(`./assets/spotlight/portrait/${portraitImageFilename}`, Buffer.from(portraitImageData))
+  writeFileSync(`./spotlight/landscape/${landscapeImageFilename}`, Buffer.from(landscapeImageData))
+  writeFileSync(`./spotlight/portrait/${portraitImageFilename}`, Buffer.from(portraitImageData))
 
   files[0].push(landscapeImageFilename)
   files[1].push(portraitImageFilename)
 }
 
-writeFileSync("./assets/spotlight/items", spotlightImages.length.toString()+"\n"+files.flat().join("\n"))
+writeFileSync("./spotlight/items", spotlightImages.length.toString()+"\n"+files.flat().join("\n"))
