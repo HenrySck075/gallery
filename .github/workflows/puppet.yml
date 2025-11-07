@@ -82,6 +82,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build-and-push-image, filter]
     strategy:
+      fail-fast: true
       matrix:
         metadata-folder: [domestic, world]
     if: |
@@ -111,58 +112,119 @@ jobs:
         WEBGL_WORKAROUND: amogus
       run: node main.ts ../${{ matrix.metadata-folder }}/metadata.json
       working-directory: ./renderer
-    - name: Roll a Windows Spotlight background for fun
-      run: node spotlight.ts
-      working-directory: ./renderer
 
-    - name: Delete old images artifact
-      uses: philips-labs/action-delete-artifacts@v1.0.0
-      with:
-          workflow: puppet.yml
-          # becausw this delete all specified artifacts, we need to run this step beforehand
-          name: wplace-images-${{ matrix.metadata-folder }}
-          workflow_conclusion: success
-      # if it doesnt exist either this is first run or skill issue
-      continue-on-error: true
     - name: Upload images
       uses: actions/upload-artifact@v4
       with:
         name: wplace-images-${{ matrix.metadata-folder }}
         path: renderer/images
+  
+  windows-spotlight:
+    name: Windows Spotlight Background
+    needs: filter
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        sparse-checkout: |
+          renderer
+          sparse-checkout-cone-mode: false
+    - name: Setup node
+      uses: actions/setup-node@v4
+      with:
+        node-version: '24.x'
+        cache: 'npm' # or 'yarn'
+        
+    - name: Install dependencies
+      run: npm ci
+      working-directory: ./renderer
+      
+    - name: Run spotlight generator
+      run: node spotlight.ts
+      working-directory: ./renderer
+      
+    - name: Upload spotlight images
+      uses: actions/upload-artifact@v4
+      with:
+        name: spotlight
+        path: renderer/spotlight
+        timeout-minutes: 30 # rarely ever captures images this long but if it does pls increase this
 
   # The GitHub Pages
   # Build job
   build:
     runs-on: ubuntu-latest
-    needs: capture-images
+    needs: [capture-images, windows-spotlight]
     if: |
       always() && 
       (needs.capture-images.result == 'success' || needs.capture-images.result == 'skipped')
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Get images (from latest run)
+      - name: h
+        run: mkdir -p assets/images
+      # Slight inconvenience but it gets the job done
+      - name: Get images (from latest run) (YazawaLiner)
         if: needs.capture-images.result == 'skipped'
         uses: dawidd6/action-download-artifact@v3
         with:
-          # This is the name of the artifact uploaded in the 'generator' job
-          name: wplace-images 
+          name: wplace-images-domestic
           
-          # Crucial: Search for the last run that successfully created the artifact
           workflow: puppet.yml 
           workflow_conclusion: completed
           branch: ${{ github.ref_name }}
           check_artifacts: true
           search_artifacts: true
           
-          # Optional: Define the local path where the files will be downloaded
-          path: ./assets 
-      - name: Get images (from this run)
+          path: ./assets/images/domestic
+      - name: Get images (from this run) (YazawaLiner)
         if: needs.capture-images.result == 'success'
         uses: actions/download-artifact@v4
         with:
-          name: wplace-images
-          path: ./assets
+          name: wplace-images-domestic
+          path: ./assets/images/domestic
+
+      - name: Get images (from latest run) (World)
+        if: needs.capture-images.result == 'skipped'
+        uses: dawidd6/action-download-artifact@v3
+        with:
+          name: wplace-images-world
+          
+          workflow: puppet.yml 
+          workflow_conclusion: completed
+          branch: ${{ github.ref_name }}
+          check_artifacts: true
+          search_artifacts: true
+          
+          path: ./assets/images/world
+      - name: Get images (from this run) (World)
+        if: needs.capture-images.result == 'success'
+        uses: actions/download-artifact@v4
+        with:
+          name: wplace-images-world
+          path: ./assets/images/world
+
+      - name: Get spotlight background
+        if: needs.capture-images.result == 'skipped'
+        uses: dawidd6/action-download-artifact@v3
+        with:
+          name: spotlight
+          
+          workflow: puppet.yml 
+          workflow_conclusion: completed
+          branch: ${{ github.ref_name }}
+          check_artifacts: true
+          search_artifacts: true
+          
+          path: ./assets/spotlight
+      - name: Get spotlight background
+        if: needs.capture-images.result == 'success'
+        uses: actions/download-artifact@v4
+        with:
+          name: spotlight
+          path: ./assets/spotlight
 
       - name: Thumbnails gen setup
         run: mkdir ./assets/thumbnails
@@ -191,7 +253,7 @@ jobs:
             const owner = context.repo.owner;
             const repo = context.repo.repo;
             const workflowFile = 'puppet.yml';
-            const artifactName = 'wplace-images';
+            const artifactName = 'spotlight';
 
             let latestUploadDate = null;
             let page = 1;

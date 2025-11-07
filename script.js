@@ -35,6 +35,13 @@ const dialog = document.getElementById('image-dialog');
 const dialogImage = document.getElementById('dialog-image');
 const redirectBtn = document.getElementById('redirect-btn');
 
+// clone the #close-btn-svg template into all .close-btn elements
+{
+  const closeBtnSvgTemplate = document.getElementById("close-btn-svg");
+  document.querySelectorAll(".close-btn").forEach((btn)=>{
+    btn.appendChild(closeBtnSvgTemplate.content.cloneNode(true));
+  })
+}
 
 const m_title = document.getElementById("title");
 const m_desc = document.getElementById("desc");
@@ -63,9 +70,9 @@ const spotlightIdx = Math.round(Math.random() * (spotlights - 1));
 document.documentElement.style.setProperty("--spotlight-background-landscape", `url("../assets/spotlight/landscape/${sldata[spotlightIdx]}")`)
 document.documentElement.style.setProperty("--spotlight-background-portrait", `url("../assets/spotlight/portrait/${sldata[spotlights+spotlightIdx]}")`)
 
-const regionMaps = decode(await (await fetch("../assets/regionMaps")).arrayBuffer());
 // this is the last path segment
 const folder = window.location.pathname.split("/").filter((v)=>v.length>0).pop();
+const regionMaps = decode(await (await fetch(`../assets/images/${folder}/regionMaps`)).arrayBuffer());
 
 const submit_dialog = document.getElementById("submit-dialog")
 const submit_error_text = document.getElementById("submit-error-text");

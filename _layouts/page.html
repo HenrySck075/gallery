@@ -63,7 +63,6 @@
     .bg {
       -webkit-backdrop-filter: blur(36px);
       backdrop-filter: blur(36px);
-      overflow-y: scroll;
       background-image: url('../noise.png');
       background-repeat: repeat;
       box-shadow: 0px 25.6px 57.6px rgb(0 0 0 / 14%), 0px 0px 16.4px rgb(0 0 0 / 12%); 
@@ -75,41 +74,58 @@
   {% if page.world %}
   <script>const WORLD=true</script>
   {% endif %}
-  <div style="max-width: 1200px; margin: 0 auto; padding: 24px; color: var(--colorNeutralForeground2);" class="bg">
-    <fluent-text block style="text-align: center; margin: 20px 0;"><h1>{{ page.t }} Gallery</h1></fluent-text>
-    <fluent-text>{{ page.h }}</fluent-text>
-    <fluent-text block style="padding-top: 4px;">
-      Submit images through <a href="https://github.com/rinaboards/gallery/issues">the page's issues list</a> (see <a href="https://github.com/rinaboards/gallery/blob/master/CONTRIBUTING.md">here</a> for how to write an entry)
-    </fluent-text>
-    <fluent-text block>Or you can also do it
-      <fluent-button appearance="outline" id="submit-diag-open-btn">Here</fluent-button>
-    </fluent-text>
-    <fluent-text block data-lastupdated="{{UPLOAD_DATE}}" id="date">Last updated</fluent-text>
-    <fluent-text block style="margin: 20px 0; font-size: 11px">
-      <p>© 2025 HenrySck075. All Rights Reserved...</p>
-      <p>...except, all images and artwork displayed on this site (including that very blurry Spotlight images in the background) are the property of and belongs to their respective owners and creators.</p>
-    </fluent-text>
-    <fluent-tablist style="padding-block: 4px;" id="page-switcher">
-      <fluent-tab id="ps-yl">YazawaLiner</fluent-tab>
-      <fluent-tab id="ps-world">World</fluent-tab>
-    </fluent-tablist>
-    <div style="display: flex; flex-direction: row;"> 
-      <div style="flex: 1;"></div>
-      <fluent-dropdown multiple placeholder="Filter" id="filter-dropdown">
-        <fluent-listbox id="filter-dropdown-options">
-          <fluent-button appearance="subtle" id="filter-clear">Clear</fluent-button>
-        </fluent-listbox>
-      </fluent-dropdown>
+  <template id="close-btn-svg">
+    <svg
+      fill="currentColor"
+      aria-hidden="true"
+      width="20"
+      height="20"
+      viewBox="0 0 20 20"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="m4.09 4.22.06-.07a.5.5 0 0 1 .63-.06l.07.06L10 9.29l5.15-5.14a.5.5 0 0 1 .63-.06l.07.06c.18.17.2.44.06.63l-.06.07L10.71 10l5.14 5.15c.18.17.2.44.06.63l-.06.07a.5.5 0 0 1-.63.06l-.07-.06L10 10.71l-5.15 5.14a.5.5 0 0 1-.63.06l-.07-.06a.5.5 0 0 1-.06-.63l.06-.07L9.29 10 4.15 4.85a.5.5 0 0 1-.06-.63l.06-.07-.06.07Z"
+        fill="currentColor"
+      ></path>
+    </svg>
+  </template>
+  <div style="margin: 0 auto; padding: 24px; color: var(--colorNeutralForeground2);" class="bg">
+    <div style="max-width: 1200px;">
+      <fluent-text block style="text-align: center; margin: 20px 0;"><h1>{{ page.t }} Gallery</h1></fluent-text>
+      <fluent-text>{{ page.h }}</fluent-text>
+      <fluent-text block style="padding-top: 4px;">
+        Submit images through <a href="https://github.com/rinaboards/gallery/issues">the page's issues list</a> (see <a href="https://github.com/rinaboards/gallery/blob/master/CONTRIBUTING.md">here</a> for how to write an entry)
+      </fluent-text>
+      <fluent-text block>Or you can also do it
+        <fluent-button appearance="outline" id="submit-diag-open-btn">Here</fluent-button>
+      </fluent-text>
+      <fluent-text block data-lastupdated="{{UPLOAD_DATE}}" id="date">Last updated</fluent-text>
+      <fluent-text block style="margin: 20px 0; font-size: 11px">
+        <p>© 2025 HenrySck075. All Rights Reserved...</p>
+        <p>...except, all images and artwork displayed on this site (including that very blurry Spotlight images in the background) are the property of and belongs to their respective owners and creators.</p>
+      </fluent-text>
+      <fluent-tablist style="padding-block: 4px;" id="page-switcher">
+        <fluent-tab id="ps-yl">YazawaLiner</fluent-tab>
+        <fluent-tab id="ps-world">World</fluent-tab>
+      </fluent-tablist>
+      <div style="display: flex; flex-direction: row;"> 
+        <div style="flex: 1;"></div>
+        <fluent-dropdown multiple placeholder="Filter" id="filter-dropdown">
+          <fluent-listbox id="filter-dropdown-options">
+            <fluent-button appearance="subtle" id="filter-clear">Clear</fluent-button>
+          </fluent-listbox>
+        </fluent-dropdown>
+      </div>
+      <div id="gallery" class="gallery-container"></div>
     </div>
-    <div id="gallery" class="gallery-container"></div>
   </div>
 
   <fluent-dialog id="image-dialog">
     <fluent-dialog-body>
       <img id="dialog-image" src="" alt="Image" class="dialog-image">
       <div style="width: 100%;">
-        <fluent-text block><h2 id="title"></h2></fluent-text>
-        <fluent-badge id="region" style="padding-top: 4px;"></fluent-badge>
+        <fluent-text block style="padding-bottom: 4px;"><h2 id="title"></h2></fluent-text>
+        <fluent-badge id="region"></fluent-badge>
         <fluent-text block id="desc"></fluent-text>
         <br>
         <fluent-text block id="tilePos"></fluent-text>
@@ -121,21 +137,8 @@
         appearance="transparent"
         icon-only
         aria-label="close"
-      >
-        <svg
-          fill="currentColor"
-          aria-hidden="true"
-          width="20"
-          height="20"
-          viewBox="0 0 20 20"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="m4.09 4.22.06-.07a.5.5 0 0 1 .63-.06l.07.06L10 9.29l5.15-5.14a.5.5 0 0 1 .63-.06l.07.06c.18.17.2.44.06.63l-.06.07L10.71 10l5.14 5.15c.18.17.2.44.06.63l-.06.07a.5.5 0 0 1-.63.06l-.07-.06L10 10.71l-5.15 5.14a.5.5 0 0 1-.63.06l-.07-.06a.5.5 0 0 1-.06-.63l.06-.07L9.29 10 4.15 4.85a.5.5 0 0 1-.06-.63l.06-.07-.06.07Z"
-            fill="currentColor"
-          ></path>
-        </svg>
-      </fluent-button>
+        class="close-btn"
+      ></fluent-button>
 
     </fluent-dialog-body>
   </fluent-dialog>
@@ -147,23 +150,34 @@
       <fluent-text block>
         Before submit an image, ensure it meets the submission guidelines (The <a href="https://docs.github.com/en/site-policy">GitHub site policy</a>.)</li>
       </fluent-text>
-      <!-- Inputs that represents up the following data:
-        {
-          file: "filename.imgext",
-          title: "Title",
-          description: "Desc",
-          coord: [7,7],
-          categories: ["preferably do something like", "youtube tags input", "where entered categories are displayed as badges", "and stored as list initially"]
-        }
-      -->
       <fluent-text-input required id="submit-title" placeholder="Title" style="width: 100%; margin-top: 8px;">Title</fluent-text-input>
-      <fluent-textarea required id="submit-desc" placeholder="meow">Description</fluent-textarea>
+      <fluent-textarea required style="margin-top: 8px;" id="submit-desc" placeholder="meow">
+        <fluent-text block slot="label">Description</fluent-text>
+      </fluent-textarea>
       <fluent-text-input id="submit-filename" placeholder="hallo.png" style="width: 100%; margin-top: 8px;">Filename</fluent-text-input>
       <div style="display: flex; flex-direction: row; gap: 8px; margin-top: 8px;">
         <fluent-text-input required type="tel" id="submit-coord-lat" placeholder="Latitude" style="flex: 1;">Latitude</fluent-text-input>
         <fluent-text-input required type="tel" id="submit-coord-lng" placeholder="Longitude" style="flex: 1;">Longitude</fluent-text-input>
       </div>
-      <fluent-text-input id="submit-categories" placeholder="Categories (comma separated)" style="width: 100%; margin-top: 8px;">Categories</fluent-text-input>
+      <fluent-text-input id="submit-categories" placeholder="Categories (comma separated)" style="width: 100%; margin-top: 8px;">
+        Categories
+        <!--
+        <div slot="start" style="display: flex; flex-direction: row; flex-wrap: wrap; gap: 4px;" id="category-badges"></div>
+
+        <template id="category-badge-template">
+          <fluent-badge color="subtle">
+            <fluent-button
+              tabindex="0"
+              slot="end"
+              appearance="transparent"
+              icon-only
+              aria-label="close"
+              class="close-btn"
+            ></fluent-button>
+          </fluent-badge>
+        </template>
+        -->
+      </fluent-text-input>
 
       <fluent-button id="submit-submit-btn" appearance="accent" style="margin-top: 16px;">Submit</fluent-button>
       <fluent-text id="submit-error-text" style="color: red; display: none;"></fluent-text>
@@ -174,21 +188,8 @@
         appearance="transparent"
         icon-only
         aria-label="close"
-      >
-        <svg
-          fill="currentColor"
-          aria-hidden="true"
-          width="20"
-          height="20"
-          viewBox="0 0 20 20"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="m4.09 4.22.06-.07a.5.5 0 0 1 .63-.06l.07.06L10 9.29l5.15-5.14a.5.5 0 0 1 .63-.06l.07.06c.18.17.2.44.06.63l-.06.07L10.71 10l5.14 5.15c.18.17.2.44.06.63l-.06.07a.5.5 0 0 1-.63.06l-.07-.06L10 10.71l-5.15 5.14a.5.5 0 0 1-.63.06l-.07-.06a.5.5 0 0 1-.06-.63l.06-.07L9.29 10 4.15 4.85a.5.5 0 0 1-.06-.63l.06-.07-.06.07Z"
-            fill="currentColor"
-          ></path>
-        </svg>
-      </fluent-button>
+        class="close-btn"
+      ></fluent-button>
 
 
     </fluent-dialog-body>
