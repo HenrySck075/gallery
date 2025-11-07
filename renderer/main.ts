@@ -1,6 +1,6 @@
 import fs from 'fs'
 
-const metadataFile = process.env[2]!
+const metadataFile = process.argv[2]!
 const saveFolder = `images`
 // check both's existence before continuing
 if (!fs.existsSync(metadataFile)) {
@@ -41,7 +41,7 @@ l.configure({
 })
 
 const logger = l.getLogger()
-logger.level = process.argv[2] ?? "INFO"
+logger.level = "INFO"
 
 const CHROMIUM_PATH = process.env.CHROMIUM_PATH
 

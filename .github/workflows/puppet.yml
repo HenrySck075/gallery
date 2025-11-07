@@ -27,6 +27,7 @@ jobs:
       render: ${{ steps.filter.outputs.renderer }}
     steps:
     - uses: actions/checkout@v4
+    # known: Anything not a push event causes every file to be marked as changed
     - uses: dorny/paths-filter@v3
       id: filter
       with:
