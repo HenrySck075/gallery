@@ -41,7 +41,7 @@ l.configure({
 })
 
 const logger = l.getLogger()
-logger.level = "INFO"
+logger.level = "DEBUG"
 
 const CHROMIUM_PATH = process.env.CHROMIUM_PATH
 
@@ -183,11 +183,17 @@ await page.goto("https://wplace.live")
 if (process.env.ENABLE_RECORDING)
   rec = await page.screencast({path: "debug/r.webm", format: "webm"})
 try{
-  const h = await page.locator("div#map ~ div > div button[title=Explore]").waitHandle()
+  const h = await page.locator("div#map ~ div > div button[title=Search]").waitHandle()
   // wait for a random good delay before clicking
   setTimeout(async ()=>{
-    logger.debug("Trigger map() function call")
-    await h.click()
+    logger.debug("Trigger map() function call (1/2): Search menu")
+    await h.click();
+    // The second layer
+    const j = await page.locator("button.tooltip.btn[data-tip=\"Random place\"]").waitHandle();
+    setTimeout(async ()=>{
+      logger.debug("Trigger map() function call (2/2): Random place button")
+      await j.click();
+    }, 1000 + Math.random() * 2000)
   }, 2000 + Math.random() * 2000)
 } catch(v){
   logger.fatal("Cannot locate the explore button, probably the map is unable to be initialized?")
