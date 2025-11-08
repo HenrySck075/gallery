@@ -92,7 +92,7 @@ submit_btn.addEventListener("click", ()=>{
   const filename = document.getElementById("submit-filename").value;
   const coordLat = parseFloat(document.getElementById("submit-coord-lat").value);
   const coordLng = parseFloat(document.getElementById("submit-coord-lng").value);
-  const categories = document.getElementById("submit-categories").value.split(",").map((v)=>v.trim()).filter((v)=>v.length > 0);
+  const categories = (document.getElementById("submit-categories").value ?? "").split(",").map((v)=>v.trim()).filter((v)=>v.length > 0);
 
   if (!title || !description || !filename || isNaN(coordLat) || isNaN(coordLng)) {
     alert("Please fill in all required fields.");
