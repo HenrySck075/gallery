@@ -119,8 +119,8 @@ devtools.on("Debugger.scriptParsed", (p)=>{
   // Find the position after "{get map(){return " (before the return) in the src
   devtools.send("Debugger.getScriptSource", {scriptId: p.scriptId}).then(async (src)=>{
     const t1 = ".Map=class extends ";
-    const t2 = "{constructor(";
-    const index1 = src.scriptSource.indexOf(t2)
+    const t2 = "}_setupContainer()";
+    const index1 = src.scriptSource.indexOf(t1)
     if (index1 === -1) return;
 
     const index2 = src.scriptSource.indexOf(t2, index1 + t1.length);
@@ -128,7 +128,7 @@ devtools.on("Debugger.scriptParsed", (p)=>{
 
     const pos = src.scriptSource.indexOf("{", index2 + t2.length)+1;
 
-    const copier = `window.__tmp_maplibre_maps_obj.push(this)`
+    const copier = `window.${mapobj_name} = this`
 
     const lineNumber = src.scriptSource.slice(0, pos).split("\n").length - 1
     const columnNumber = pos - src.scriptSource.lastIndexOf("\n", pos) - 1
@@ -146,7 +146,6 @@ devtools.on("Debugger.scriptParsed", (p)=>{
 
     bpIds.push(breakpointId);
 
-    // TODO: ts heavy af
     devtools.on("Debugger.paused", async (pauseEvent)=>{
       for (const callFrame of pauseEvent.callFrames) {
         if (callFrame.location.scriptId === p.scriptId) {
@@ -156,11 +155,19 @@ devtools.on("Debugger.scriptParsed", (p)=>{
             callFrameId: callFrame.callFrameId,
             expression: copier
           })
-          // resume execution
+          logger.debug("Captured, removing all breakpoints")
+          // remove all breakpoints
+          for (const id of bpIds) {
+            await devtools.send("Debugger.removeBreakpoint", {breakpointId: id})
+          }
+          maplibre_map_extracted = true
+          // resume execution (when it has to)
           try {
+            logger.debug("Resuming")
             await devtools.send("Debugger.resume")
+            logger.debug("Does not throw!")
           } catch {
-            // if it throws then it is already resumed
+            logger.debug("Does throw!")
           }
           return
         }
@@ -172,8 +179,6 @@ devtools.on("Debugger.scriptParsed", (p)=>{
 await page.goto("https://wplace.live")
 if (process.env.ENABLE_RECORDING)
   rec = await page.screencast({path: "debug/r.webm", format: "webm"})
-
-await page.locator("div#map ~ div > div button[title=Search]").waitHandle();
 
 const canvasHandle = await page.waitForSelector("canvas.maplibregl-canvas");
 if (canvasHandle) {
@@ -205,29 +210,13 @@ if (canvasHandle) {
     }
   }, "canvas.maplibregl-canvas")
 
-  // evaluate on page to find the object in __tmp_maplibre_maps_obj where its `_canvas` property is our canvas handle
-  await devtools.send("Runtime.evaluate", {
-    expression: `const __tmp_canvas = document.querySelector("canvas.maplibregl-canvas"); for (const m of window.__tmp_maplibre_maps_obj) {if (m._canvas === __tmp_canvas) {window.${mapobj_name} = m;break;}} window.__tmp_maplibre_maps_obj = [];`
-  })
-
-  // if theres an object saved
-  const res = await devtools.send("Runtime.evaluate", {
-    expression: `window.${mapobj_name} !== undefined`,
-    returnByValue: true
-  });
-  if (res.result.value === true) {
-    logger.debug("Captured, removing all breakpoints")
-    // remove all breakpoints
-    for (const id of bpIds) {
-      await devtools.send("Debugger.removeBreakpoint", {breakpointId: id})
-    }
-    maplibre_map_extracted = true
-  }
 }
 
 
 // Wait for 30s until maplibre_map_extracted is true
 const ct = Date.now();
+let h = 0;
+logger.debug("Checking the list of map objects");
 while (!maplibre_map_extracted) {
   await sleep(100);
   if (Date.now() - ct > 30000) {

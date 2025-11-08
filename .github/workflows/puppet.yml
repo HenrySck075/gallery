@@ -35,9 +35,11 @@ jobs:
           Dockerfile:
             - 'Dockerfile'
           renderer:
-            - 'renderer/**'
+            - 'renderer/main.ts'
             - 'domestic/metadata.json'
             - 'world/metadata.json'
+          spotlight:
+            - 'renderer/spotlight/**'
   build-and-push-image:
     runs-on: ubuntu-latest
     needs: filter
@@ -89,7 +91,7 @@ jobs:
     if: |
       always() && 
       (needs.build-and-push-image.result == 'success' || needs.build-and-push-image.result == 'skipped') &&
-      (needs.filter.outputs.render == 'true' || github.event_name == 'schedule' || inputs.force_recapture == 'true' )
+      (needs.filter.outputs.renderer == 'true' || github.event_name == 'schedule' || inputs.force_recapture == 'true' )
     permissions:
       contents: read
       packages: read
@@ -126,6 +128,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    if: needs.filter.outputs.spotlight == 'true'
     steps:
     - uses: actions/checkout@v4
       with:

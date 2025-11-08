@@ -36,7 +36,7 @@ for (const spotlightImageData of spotlightImages) {
 
   sharp(landscapeImageData).resize(1366,768,{fit: "inside"}).toFile(`./spotlight/landscape/${landscapeImageFilename}`)
 
-  sharp(portraitImageData).resize(768,1366,{fit:"outside"}).toFile(`./spotlight/portrait/${portraitImageData}`)
+  sharp(portraitImageData).resize(768,1366,{fit:"outside"}).toFile(`./spotlight/portrait/${portraitImageFilename}`)
 
   files[0].push(landscapeImageFilename)
   files[1].push(portraitImageFilename)

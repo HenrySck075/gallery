@@ -5,8 +5,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{ page.t }} Gallery</title>
+  <!--some seoing because why not-->
+  <meta name="description" content="{{ page.h }}">
+  <meta name="keywords" content="wplace,gallery,images list">
+  <meta name="author" content="HenrySck075">
+  <meta name="robots" content="index, follow">
+  <meta name="language" content="English">
 
-  <!--<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">-->
   <link rel="stylesheet" href="../assets/css/style.css">
   <style>
     /*
@@ -90,7 +95,7 @@
     </svg>
   </template>
   <div style="margin: 0 auto; padding: 24px; color: var(--colorNeutralForeground2);" class="bg">
-    <div style="max-width: 1200px;">
+    <div style="min-width: 600px;">
       <fluent-text block style="text-align: center; margin: 20px 0;"><h1>{{ page.t }} Gallery</h1></fluent-text>
       <fluent-text>{{ page.h }}</fluent-text>
       <fluent-text block style="padding-top: 4px;">
@@ -179,7 +184,7 @@
         -->
       </fluent-text-input>
 
-      <fluent-button id="submit-submit-btn" appearance="accent" style="margin-top: 16px;">Submit</fluent-button>
+      <fluent-button id="submit-submit-btn" appearance="primary" style="margin-top: 16px;">Submit</fluent-button>
       <fluent-text id="submit-error-text" style="color: red; display: none;"></fluent-text>
 
       <fluent-button

@@ -90,7 +90,7 @@ submit_btn.addEventListener("click", ()=>{
   const coordLng = parseFloat(document.getElementById("submit-coord-lng").value);
   const categories = document.getElementById("submit-categories").value.split(",").map((v)=>v.trim()).filter((v)=>v.length > 0);
 
-  if (!title || !description || !filename || isNaN(coordX) || isNaN(coordY)) {
+  if (!title || !description || !filename || isNaN(coordLat) || isNaN(coordLng)) {
     alert("Please fill in all required fields.");
     return;
   }
@@ -201,7 +201,7 @@ fetch('metadata.mpk')
         dialogImage.src = `../assets/images/${folder}/${item.img}`;
         m_title.textContent = item.title;
         m_desc.textContent = item.description ?? "";
-        m_region.textContent = regionMaps[folder][item.img];
+        m_region.textContent = regionMaps[item.img];
 
         const tilePos = mercUtil.latLonToTileAndPixel(llp[0], llp[1], 11)
 
