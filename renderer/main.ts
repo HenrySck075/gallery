@@ -107,11 +107,13 @@ let maplibre_map_extracted = false
 const bpIds: string[] = []
 
 await devtools.send("Debugger.enable")
+// eval "window.__tmp_maplibre_maps_obj = []"
+await devtools.send("Runtime.evaluate", {
+  expression: `window.${mapobj_name} = undefined;window.__tmp_maplibre_maps_obj = []`
+})
 devtools.on("Debugger.scriptParsed", (p)=>{
   if (!p.url.startsWith("https://wplace.live/_app/immutable/nodes/")) return;
   if (p.url.startsWith("https://wplace.live/_app/immutable/nodes/app")) return;
-  // node 0 has a copy of the Map class def idk why
-  if (p.url.startsWith("https://wplace.live/_app/immutable/nodes/0.")) return;
   logger.debug(p.url)
 
   // Find the position after "{get map(){return " (before the return) in the src
@@ -126,7 +128,7 @@ devtools.on("Debugger.scriptParsed", (p)=>{
 
     const pos = src.scriptSource.indexOf("{", index2 + t2.length)+1;
 
-    const copier = `window.${mapobj_name} = this`
+    const copier = `window.__tmp_maplibre_maps_obj.push(this)`
 
     const lineNumber = src.scriptSource.slice(0, pos).split("\n").length - 1
     const columnNumber = pos - src.scriptSource.lastIndexOf("\n", pos) - 1
@@ -216,6 +218,10 @@ if (canvasHandle) {
     }
   }, "canvas.maplibregl-canvas")
 
+  // evaluate on page to find the object in __tmp_maplibre_maps_obj where its `_canvas` property is our canvas handle
+  await devtools.send("Runtime.evaluate", {
+    expression: `const __tmp_canvas = document.querySelector("canvas.maplibregl-canvas"); for (const m of window.__tmp_maplibre_maps_obj) {if (m._canvas === __tmp_canvas) {window.${mapobj_name} = m;break;}} window.__tmp_maplibre_maps_obj = [];`
+  })
 }
 
 
