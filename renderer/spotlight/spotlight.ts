@@ -1,4 +1,5 @@
 import {writeFileSync, mkdirSync} from "fs"
+import sharp from "sharp"
 
 const j = await (await fetch("https://fd.api.iris.microsoft.com/v4/api/selection?&placement=88000820&bcnt=4&country=JP&locale=ja-JP&fmt=json")).json()
 //console.dir(j)
@@ -33,8 +34,9 @@ for (const spotlightImageData of spotlightImages) {
   const landscapeImageData = await (await fetch(landscapeImageUrl)).arrayBuffer()
   const portraitImageData = await (await fetch(portraitImageUrl)).arrayBuffer()
 
-  writeFileSync(`./spotlight/landscape/${landscapeImageFilename}`, Buffer.from(landscapeImageData))
-  writeFileSync(`./spotlight/portrait/${portraitImageFilename}`, Buffer.from(portraitImageData))
+  sharp(landscapeImageData).resize(1366,768,{fit: "inside"}).toFile(`./spotlight/landscape/${landscapeImageFilename}`)
+
+  sharp(portraitImageData).resize(768,1366,{fit:"outside"}).toFile(`./spotlight/portrait/${portraitImageData}`)
 
   files[0].push(landscapeImageFilename)
   files[1].push(portraitImageFilename)

@@ -110,14 +110,21 @@ await devtools.send("Debugger.enable")
 devtools.on("Debugger.scriptParsed", (p)=>{
   if (!p.url.startsWith("https://wplace.live/_app/immutable/nodes/")) return;
   if (p.url.startsWith("https://wplace.live/_app/immutable/nodes/app")) return;
+  // node 0 has a copy of the Map class def idk why
+  if (p.url.startsWith("https://wplace.live/_app/immutable/nodes/0.")) return;
   logger.debug(p.url)
 
   // Find the position after "{get map(){return " (before the return) in the src
   devtools.send("Debugger.getScriptSource", {scriptId: p.scriptId}).then(async (src)=>{
-    const index = src.scriptSource.indexOf("}_fitInternal(")
-    if (index === -1) return;
+    const t1 = ".Map=class extends ";
+    const t2 = "{constructor(";
+    const index1 = src.scriptSource.indexOf(t2)
+    if (index1 === -1) return;
 
-    const pos = src.scriptSource.indexOf("{", index + "}_fitInternal(".length)+1;
+    const index2 = src.scriptSource.indexOf(t2, index1 + t1.length);
+    if (index2 === -1) return;
+
+    const pos = src.scriptSource.indexOf("{", index2 + t2.length)+1;
 
     const copier = `window.${mapobj_name} = this`
 
@@ -133,7 +140,7 @@ devtools.on("Debugger.scriptParsed", (p)=>{
       }
     })
 
-    logger.debug(`Placed breakpoint ${p.url}:${lineNumber}:${columnNumber}`)
+    logger.debug(`Placed breakpoint ${p.url}:${lineNumber}:${columnNumber} (${p.scriptId})`)
 
     bpIds.push(breakpointId);
 
@@ -141,6 +148,7 @@ devtools.on("Debugger.scriptParsed", (p)=>{
     devtools.on("Debugger.paused", async (pauseEvent)=>{
       for (const callFrame of pauseEvent.callFrames) {
         if (callFrame.location.scriptId === p.scriptId) {
+          logger.debug(`Breakpoint hit on ${callFrame.location.scriptId}`)
           // evaluate copier in this call frame
           await devtools.send("Debugger.evaluateOnCallFrame", {
             callFrameId: callFrame.callFrameId,
@@ -176,24 +184,51 @@ await page.goto("https://wplace.live")
 if (process.env.ENABLE_RECORDING)
   rec = await page.screencast({path: "debug/r.webm", format: "webm"})
 
-await sleep(10000);
-logger.debug("g");
-// shift+left drag by a large distance randomly to trigger the breakpoint
-await page.keyboard.down("Shift")
-const startX = 400 + Math.random() * 800
-const startY = 300 + Math.random() * 400
-const endX = startX + (Math.random() - 0.5) * 1000
-const endY = startY + (Math.random() - 0.5) * 600
-await page.mouse.move(startX, startY)
-await page.mouse.down()
-await page.mouse.move(endX, endY, {steps: 20})
-await page.mouse.up()
-await page.keyboard.up("Shift")
+await page.locator("div#map ~ div > div button[title=Search]").waitHandle();
 
-// Eternally waits until maplibre_map_extracted is true
+const canvasHandle = await page.waitForSelector("canvas.maplibregl-canvas");
+if (canvasHandle) {
+  // Anti-puppet-stupidity measure: delete every elements in body > div except the one that contains canvasHandle
+  // (also set up to hide cloudflare turnstile iframes)
+  await page.evaluate((canvasSel)=>{
+    const canvas = document.querySelector(canvasSel)
+    if (!canvas) return;
+    const bodyDiv = document.querySelector("body > div")
+    if (!bodyDiv) return;
+    for (const child of Array.from(bodyDiv.children)) {
+      if (!child.contains(canvas)) {
+        bodyDiv.removeChild(child)
+      }
+    }
+    // inside the remaining child, delete every child except #map
+    
+    const remainingChild = bodyDiv.children[0]
+    for (const child of Array.from(remainingChild.children)) {
+      if (child.id !== "map") {
+        remainingChild.removeChild(child)
+      }
+    }
+
+    // hide iframes
+    const iframes = document.querySelectorAll("iframe")
+    for (const iframe of Array.from(iframes)) {
+      iframe.style.display = "none"
+    }
+  }, "canvas.maplibregl-canvas")
+
+}
+
+
+// Wait for 30s until maplibre_map_extracted is true
+const ct = Date.now();
 while (!maplibre_map_extracted) {
   await sleep(100);
+  if (Date.now() - ct > 30000) {
+    throw "Timeout exceeded waiting for Map object."
+  }
 }
+
+await sleep(1000)
 
 // disable debugger again we dont need it
 await devtools.send("Debugger.disable")
@@ -231,40 +266,6 @@ const countryInfos: {
 
 
 logger.info("Capturing images")
-
-
-
-const canvasHandle = await page.waitForSelector("canvas.maplibregl-canvas");
-if (canvasHandle) {
-  // Anti-puppet-stupidity measure: delete every elements in body > div except the one that contains canvasHandle
-  // (also set up to hide cloudflare turnstile iframes)
-  await page.evaluate((canvasSel)=>{
-    const canvas = document.querySelector(canvasSel)
-    if (!canvas) return;
-    const bodyDiv = document.querySelector("body > div")
-    if (!bodyDiv) return;
-    for (const child of Array.from(bodyDiv.children)) {
-      if (!child.contains(canvas)) {
-        bodyDiv.removeChild(child)
-      }
-    }
-    // inside the remaining child, delete every child except #map
-    
-    const remainingChild = bodyDiv.children[0]
-    for (const child of Array.from(remainingChild.children)) {
-      if (child.id !== "map") {
-        remainingChild.removeChild(child)
-      }
-    }
-
-    // hide iframes
-    const iframes = document.querySelectorAll("iframe")
-    for (const iframe of Array.from(iframes)) {
-      iframe.style.display = "none"
-    }
-  }, "canvas.maplibregl-canvas")
-
-}
 
 // Create all save folders
 const folderPath = saveFolder

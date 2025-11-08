@@ -1,0 +1,17 @@
+{
+  "name": "spotlight",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {},
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "devDependencies": {
+    "@types/node": "^24.9.1"
+  },
+  "dependencies": {
+    "sharp": "^0.34.5"
+  }
+}

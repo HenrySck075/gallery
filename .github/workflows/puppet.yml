@@ -130,7 +130,7 @@ jobs:
     - uses: actions/checkout@v4
       with:
         sparse-checkout: |
-          renderer
+          renderer/spotlight
           sparse-checkout-cone-mode: false
     - name: Setup node
       uses: actions/setup-node@v4
@@ -140,17 +140,17 @@ jobs:
         
     - name: Install dependencies
       run: npm ci
-      working-directory: ./renderer
+      working-directory: ./renderer/spotlight
       
     - name: Run spotlight generator
       run: node spotlight.ts
-      working-directory: ./renderer
+      working-directory: ./renderer/spotlight
       
     - name: Upload spotlight images
       uses: actions/upload-artifact@v4
       with:
         name: spotlight
-        path: renderer/spotlight
+        path: renderer/spotlight/spotlight
         timeout-minutes: 30 # rarely ever captures images this long but if it does pls increase this
 
   # The GitHub Pages
@@ -255,66 +255,108 @@ jobs:
             const repo = context.repo.repo;
             const workflowFile = 'puppet.yml';
             const artifactName = 'spotlight';
+            const currentRunId = context.runId; // Get the ID of the current workflow run
 
             let latestUploadDate = null;
-            let page = 1;
-            const per_page = 20; // Check 20 runs at a time
-
-            // Loop to check recent pages of successful workflow runs
-            while (!latestUploadDate && page <= 5) { // Limit to check 100 runs max (5 pages)
-                
-                // 1. Get a page of the most recent successful runs for the specific workflow file
-                const runsResponse = await github.rest.actions.listWorkflowRuns({
+            
+            // --- NEW SECTION: Check Current Run's Artifacts ---
+            console.log(`Checking artifacts for the current run ID: ${currentRunId}`);
+            try {
+                // List artifacts for the current run ID
+                const currentRunArtifactsResponse = await github.rest.actions.listWorkflowRunArtifacts({
                     owner,
                     repo,
-                    workflow_id: workflowFile,
-                    status: 'success',
-                    per_page,
-                    page
+                    run_id: currentRunId,
                 });
-                
-                const workflowRuns = runsResponse.data.workflow_runs;
-                if (workflowRuns.length === 0) {
-                    console.log('No more successful workflow runs found.');
-                    break;
-                }
 
-                // 2. Iterate through runs on this page (newest to oldest)
-                for (const run of workflowRuns) {
+                const targetArtifactInCurrentRun = currentRunArtifactsResponse.data.artifacts.find(
+                    artifact => artifact.name === artifactName
+                );
+
+                if (targetArtifactInCurrentRun) {
+                    // Found it in the current run!
+                    // Note: 'created_at' might be very close to the current time, 
+                    // but it is the definitive timestamp for the artifact created in this run.
+                    latestUploadDate = targetArtifactInCurrentRun.created_at;
+                    console.log(`✅ Found artifact '${artifactName}' in the current run ID ${currentRunId}.`);
+                } else {
+                    console.log(`Artifact '${artifactName}' not found in the current run.`);
+                }
+            } catch (error) {
+                 // Log a warning if checking the current run fails (e.g., run is too new, permissions, or artifact not yet uploaded)
+                console.warn(`Warning: Could not check artifacts for the current run. Proceeding to check previous runs. Error: ${error.message}`);
+            }
+            // ----------------------------------------------------
+
+
+            if (!latestUploadDate) {
+                // Only proceed to check previous runs if the artifact wasn't found in the current run
+                let page = 1;
+                const per_page = 20; // Check 20 runs at a time
+
+                // Loop to check recent pages of successful workflow runs
+                while (!latestUploadDate && page <= 5) { // Limit to check 100 runs max (5 pages)
                     
-                    // 3. List artifacts for this specific run ID, filtered by name
-                    const artifactsResponse = await github.rest.actions.listWorkflowRunArtifacts({
+                    // 1. Get a page of the most recent successful runs for the specific workflow file
+                    const runsResponse = await github.rest.actions.listWorkflowRuns({
                         owner,
                         repo,
-                        run_id: run.id,
+                        workflow_id: workflowFile,
+                        status: 'success',
+                        per_page,
+                        page
                     });
-
-                    const targetArtifact = artifactsResponse.data.artifacts.find(
-                        artifact => artifact.name === artifactName
-                    );
-
-                    if (targetArtifact) {
-                        // Found it! This is the latest one since we search runs by descending order.
-                        latestUploadDate = targetArtifact.created_at;
-                        console.log(`✅ Found artifact '${artifactName}' in run ID ${run.id}.`);
-                        break; // Exit the inner loop
+                    
+                    const workflowRuns = runsResponse.data.workflow_runs;
+                    if (workflowRuns.length === 0) {
+                        console.log('No more successful workflow runs found.');
+                        break;
                     }
-                }
 
-                if (latestUploadDate) {
-                    break; // Exit the outer loop
+                    // 2. Iterate through runs on this page (newest to oldest)
+                    for (const run of workflowRuns) {
+                        
+                        // IMPORTANT: Skip the current run if it shows up in the list of successful runs
+                        if (run.id === currentRunId) {
+                            console.log(`Skipping current run ID ${run.id} as it was checked/skipped earlier.`);
+                            continue;
+                        }
+
+                        // 3. List artifacts for this specific run ID, filtered by name
+                        const artifactsResponse = await github.rest.actions.listWorkflowRunArtifacts({
+                            owner,
+                            repo,
+                            run_id: run.id,
+                        });
+
+                        const targetArtifact = artifactsResponse.data.artifacts.find(
+                            artifact => artifact.name === artifactName
+                        );
+
+                        if (targetArtifact) {
+                            // Found it! This is the latest one since we search runs by descending order.
+                            latestUploadDate = targetArtifact.created_at;
+                            console.log(`✅ Found artifact '${artifactName}' in run ID ${run.id}.`);
+                            break; // Exit the inner loop
+                        }
+                    }
+
+                    if (latestUploadDate) {
+                        break; // Exit the outer loop
+                    }
+                    page++;
                 }
-                page++;
             }
+
 
             if (latestUploadDate) {
                 // Set the result as an output variable for use in subsequent steps
                 core.setOutput('latest_upload_date', latestUploadDate);
                 console.log(`The latest upload date is: ${latestUploadDate}`);
             } else {
-                core.setFailed(`Artifact '${artifactName}' not found in the most recent successful runs of ${workflowFile}.`);
+                core.setFailed(`Artifact '${artifactName}' not found in the most recent successful runs of ${workflowFile} or the current run.`);
             }
-          
+         
       - name: "that one step to replace {{UPLOAD_DATE}} in index.html to the actual date"
         run: sed -i "s/{{UPLOAD_DATE}}/${{ steps.find_images_date.outputs.latest_upload_date }}/g" _layouts/page.html
 
