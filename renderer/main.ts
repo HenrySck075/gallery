@@ -157,8 +157,11 @@ devtools.on("Debugger.scriptParsed", (p)=>{
             expression: copier
           })
           // resume execution
-          await devtools.send("Debugger.resume")
-          maplibre_map_extracted = true
+          try {
+            await devtools.send("Debugger.resume")
+          } catch {
+            // if it throws then it is already resumed
+          }
           return
         }
       }
@@ -218,6 +221,7 @@ if (canvasHandle) {
     for (const id of bpIds) {
       await devtools.send("Debugger.removeBreakpoint", {breakpointId: id})
     }
+    maplibre_map_extracted = true
   }
 }
 
