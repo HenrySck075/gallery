@@ -81,6 +81,10 @@ document.getElementById("submit-diag-open-btn").addEventListener("click", ()=>{
   submit_error_text.style.display = "none";
 });
 
+document.getElementById("submit-close-btn").addEventListener("click", ()=>{
+  submit_dialog.hide();
+});
+
 const submit_btn = document.getElementById("submit-submit-btn");
 submit_btn.addEventListener("click", ()=>{
   const title = document.getElementById("submit-title").value;

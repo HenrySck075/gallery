@@ -73,6 +73,40 @@
       box-shadow: 0px 25.6px 57.6px rgb(0 0 0 / 14%), 0px 0px 16.4px rgb(0 0 0 / 12%); 
       background-color: color-mix(in srgb, var(--colorNeutralBackground2) 100%, transparent 20%);
     }
+
+    .header {
+      background-color: var(--colorNeutralBackground1);
+      color: var(--colorNeutralForeground1);
+      padding: 20px 24px;
+    }
+
+    #submit-dialog fluent-dialog-body {
+      padding-inline: 0;
+    }
+
+
+    #submit-dialog fluent-dialog-body {padding-inline: 0;}
+    #submit-dialog fluent-dialog-body::part(actions) {
+      padding-inline: var(--spacingHorizontalXXL);
+      background-color: var(--colorNeutralBackground2)
+    }
+    #submit-dialog fluent-dialog-body::part(content) {
+      padding-inline: var(--spacingHorizontalXXL);
+      margin-block-end: calc(var(--spacingVerticalS)*4);
+    }
+    #submit-dialog fluent-dialog-body::part(title) {
+      padding-inline: var(--spacingHorizontalXXL);
+    }
+    fluent-dialog::part(dialog) {
+      transition: var(--curveDecelerateMid) display allow-discrete, ease-out opacity, var(--curveDecelerateMid) overlay allow-discrete, ease-out scale
+    }
+    fluent-dialog::part(dialog):not([open]) {
+      transition: var(--curveAccelerateMid) display allow-discrete, ease-out opacity, var(--curveAccelerateMid) overlay allow-discrete, ease-out scale
+    }
+    fluent-dialog {
+      --dialog-starting-scale: calc(1/0.85);
+    }
+
   </style>
 </head>
 <body>
@@ -94,6 +128,7 @@
       ></path>
     </svg>
   </template>
+  <fluent-text block class="bg header"><h1>{{ page.t }} Gallery</h1></fluent-text>
   <div style="margin: 0 auto; padding: 24px; color: var(--colorNeutralForeground2);" class="bg">
     <div style="min-width: 600px;">
       <fluent-text block style="text-align: center; margin: 20px 0;"><h1>{{ page.t }} Gallery</h1></fluent-text>
@@ -184,18 +219,9 @@
         -->
       </fluent-text-input>
 
-      <fluent-button id="submit-submit-btn" appearance="primary" style="margin-top: 16px;" slot="action">Submit</fluent-button>
+      <fluent-button id="submit-close-btn" appearance="outline" style="margin-top: 16px;">Cancel</fluent-button>
+      <fluent-button id="submit-submit-btn" appearance="accent" style="margin-top: 16px;">Submit</fluent-button>
       <fluent-text id="submit-error-text" style="color: red; display: none;"></fluent-text>
-
-      <fluent-button
-        tabindex="0"
-        slot="close"
-        appearance="transparent"
-        icon-only
-        aria-label="close"
-        class="close-btn"
-      ></fluent-button>
-
 
     </fluent-dialog-body>
   </fluent-dialog>
