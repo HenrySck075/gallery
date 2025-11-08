@@ -103,10 +103,10 @@
     }
     fluent-dialog::part(dialog):not([open]) {
       transition: var(--curveAccelerateMid) display allow-discrete, ease-in opacity, var(--curveAccelerateMid) overlay allow-discrete, ease-in scale;
-      transition-duration: var(--durationGentle);
+      transition-duration: 0.167s;
     }
     fluent-dialog {
-      --dialog-starting-scale: 1.1;
+      --dialog-starting-scale: 1.05;
     }
 
   </style>
@@ -132,8 +132,7 @@
   </template>
   <fluent-text block class="bg header"><h1>{{ page.t }} Gallery</h1></fluent-text>
   <div style="margin: 0 auto; padding: 24px; color: var(--colorNeutralForeground2);" class="bg">
-    <div style="min-width: 600px;">
-      <fluent-text block style="text-align: center; margin: 20px 0;"><h1>{{ page.t }} Gallery</h1></fluent-text>
+    <div style="min-width: 400px;">
       <fluent-text>{{ page.h }}</fluent-text>
       <fluent-text block style="padding-top: 4px;">
         Submit images through <a href="https://github.com/rinaboards/gallery/issues">the page's issues list</a> (see <a href="https://github.com/rinaboards/gallery/blob/master/CONTRIBUTING.md">here</a> for how to write an entry)
