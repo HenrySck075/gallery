@@ -156,22 +156,6 @@ devtools.on("Debugger.scriptParsed", (p)=>{
             callFrameId: callFrame.callFrameId,
             expression: copier
           })
-          
-          // verify __maplibre_map's existence in global
-          logger.debug("Verifying extraction")
-          const evalResult = await devtools.send("Runtime.evaluate", {
-            expression: `window.${mapobj_name} !== undefined`
-          })
-          if (!evalResult.result.value) {
-            logger.error("Failed to extract maplibre map object!")
-            return
-          }
-
-          logger.debug("Captured, removing all breakpoints")
-          // remove all breakpoints
-          for (const id of bpIds) {
-            await devtools.send("Debugger.removeBreakpoint", {breakpointId: id})
-          }
           // resume execution
           await devtools.send("Debugger.resume")
           maplibre_map_extracted = true
@@ -222,6 +206,19 @@ if (canvasHandle) {
   await devtools.send("Runtime.evaluate", {
     expression: `const __tmp_canvas = document.querySelector("canvas.maplibregl-canvas"); for (const m of window.__tmp_maplibre_maps_obj) {if (m._canvas === __tmp_canvas) {window.${mapobj_name} = m;break;}} window.__tmp_maplibre_maps_obj = [];`
   })
+
+  // if theres an object saved
+  const res = await devtools.send("Runtime.evaluate", {
+    expression: `window.${mapobj_name} !== undefined`,
+    returnByValue: true
+  });
+  if (res.result.value === true) {
+    logger.debug("Captured, removing all breakpoints")
+    // remove all breakpoints
+    for (const id of bpIds) {
+      await devtools.send("Debugger.removeBreakpoint", {breakpointId: id})
+    }
+  }
 }
 
 
