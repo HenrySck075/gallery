@@ -98,13 +98,15 @@
       padding-inline: var(--spacingHorizontalXXL);
     }
     fluent-dialog::part(dialog) {
-      transition: var(--curveDecelerateMid) display allow-discrete, ease-out opacity, var(--curveDecelerateMid) overlay allow-discrete, ease-out scale
+      transition: var(--curveDecelerateMid) display allow-discrete, ease-out opacity, var(--curveDecelerateMid) overlay allow-discrete, ease-out scale;
+      transition-duration: var(--durationGentle);
     }
     fluent-dialog::part(dialog):not([open]) {
-      transition: var(--curveAccelerateMid) display allow-discrete, ease-out opacity, var(--curveAccelerateMid) overlay allow-discrete, ease-out scale
+      transition: var(--curveAccelerateMid) display allow-discrete, ease-in opacity, var(--curveAccelerateMid) overlay allow-discrete, ease-in scale;
+      transition-duration: var(--durationGentle);
     }
     fluent-dialog {
-      --dialog-starting-scale: calc(1/0.85);
+      --dialog-starting-scale: 1.1;
     }
 
   </style>
@@ -218,10 +220,10 @@
         </template>
         -->
       </fluent-text-input>
-
-      <fluent-button id="submit-close-btn" appearance="outline" style="margin-top: 16px;">Cancel</fluent-button>
-      <fluent-button id="submit-submit-btn" appearance="accent" style="margin-top: 16px;">Submit</fluent-button>
       <fluent-text id="submit-error-text" style="color: red; display: none;"></fluent-text>
+
+      <fluent-button id="submit-close-btn" appearance="outline" style="margin-top: 16px;" slot="action">Cancel</fluent-button>
+      <fluent-button id="submit-submit-btn" appearance="primary" style="margin-top: 16px;" slot="action">Submit</fluent-button>
 
     </fluent-dialog-body>
   </fluent-dialog>
