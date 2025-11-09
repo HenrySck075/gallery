@@ -23,6 +23,7 @@
       background-image: var(--spotlight-background-landscape);
       background-attachment: fixed;
       background-repeat: no-repeat;
+      background-size: cover;
       max-height: 1vh;
     }
     /*mobile variant which uses portrait one instead*/
@@ -98,11 +99,11 @@
       padding-inline: var(--spacingHorizontalXXL);
     }
     fluent-dialog::part(dialog) {
-      transition: var(--curveDecelerateMid) display allow-discrete, ease-out opacity, var(--curveDecelerateMid) overlay allow-discrete, ease-out scale;
-      transition-duration: var(--durationGentle);
+      /*transition: var(--curveDecelerateMid) display allow-discrete, ease-out opacity, var(--curveDecelerateMid) overlay allow-discrete, ease-out scale;*/
+      transition-duration: 0.167s;
     }
     fluent-dialog::part(dialog):not([open]) {
-      transition: var(--curveAccelerateMid) display allow-discrete, ease-in opacity, var(--curveAccelerateMid) overlay allow-discrete, ease-in scale;
+      /*transition: var(--curveAccelerateMid) display allow-discrete, ease-in opacity, var(--curveAccelerateMid) overlay allow-discrete, ease-in scale;*/
       transition-duration: 0.167s;
     }
     fluent-dialog {
