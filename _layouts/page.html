@@ -24,7 +24,9 @@
       background-attachment: fixed;
       background-repeat: no-repeat;
       background-size: cover;
-      max-height: 1vh;
+      min-height: 100vh;
+      display:flex;
+      flex-direction: column;
     }
     /*mobile variant which uses portrait one instead*/
     @media (max-width: 600px) {
@@ -132,7 +134,7 @@
     </svg>
   </template>
   <fluent-text block class="bg header"><h1>{{ page.t }} Gallery</h1></fluent-text>
-  <div style="margin: 0 auto; padding: 24px; color: var(--colorNeutralForeground2);" class="bg">
+  <div style="flex:1; padding: 24px; color: var(--colorNeutralForeground2);" class="bg">
     <div style="min-width: 400px;">
       <fluent-text>{{ page.h }}</fluent-text>
       <fluent-text block style="padding-top: 4px;">
