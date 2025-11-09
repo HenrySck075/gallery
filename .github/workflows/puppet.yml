@@ -25,6 +25,7 @@ jobs:
     outputs:
       docker_build: ${{ steps.filter.outputs.Dockerfile }}
       render: ${{ steps.filter.outputs.renderer }}
+      spotlight: ${{ steps.filter.outputs.spotlight }}
     steps:
     - uses: actions/checkout@v4
     # known: Anything not a push event causes every file to be marked as changed
@@ -91,7 +92,7 @@ jobs:
     if: |
       always() && 
       (needs.build-and-push-image.result == 'success' || needs.build-and-push-image.result == 'skipped') &&
-      (needs.filter.outputs.renderer == 'true' || github.event_name == 'schedule' || inputs.force_recapture == 'true' )
+      (needs.filter.outputs.render == 'true' || github.event_name == 'schedule' || inputs.force_recapture == 'true' )
     permissions:
       contents: read
       packages: read
