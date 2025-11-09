@@ -274,6 +274,8 @@ const mercUtil = new MercatorUtils(1000)
 for (const m of metadata) {
   logger.debug(`${m.img} ${m.bounds}`)
   // run ${__maplibre_map}.fitBounds(m.bounds, {animate: false}) and wait for 2s
+  m.bounds[0].reverse()
+  m.bounds[1].reverse()
   await page.setViewport({width: 1920, height: 1080})
   const expression = `window.${mapobj_name}.resize();await new Promise((r)=>setTimeout(r,500));window.${mapobj_name}.fitBounds(${JSON.stringify(m.bounds)}, {animate: false, duration: 0})`
   await devtools.send("Runtime.evaluate", {

@@ -24,3 +24,5 @@ Add the following entry to the [metadata file](metadata.json):
 ]
 ```
 
+Don't make the bounds too large tho because there's a zoom limit, and even in the case that I can modify its zoom limit (not now i got rate limited from the backend server) please don't do it.
+
