@@ -187,7 +187,13 @@ fetch('metadata.mpk')
       img.height = "100px";
       img.setAttribute('data-lat', llp[0]);
       img.setAttribute('data-lng', llp[1]);
+      img.onload = ()=>img.classList.add("loaded");
       
+      {
+        const skeleton = document.createElement("div");
+        skeleton.classList.add("skeleton");
+        itemContainer.appendChild(skeleton)
+      }
       itemContainer.appendChild(img);
       gallery.appendChild(itemContainer);
 

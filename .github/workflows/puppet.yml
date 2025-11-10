@@ -2,6 +2,8 @@ name: Thumbnails rendering and pages build
 on:
   push:
     branches: [master]
+    paths-ignore:
+      - '**/*.md'
   schedule:
     - cron: '6 22 */3 * *'
   workflow_dispatch:

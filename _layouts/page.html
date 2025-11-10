@@ -61,6 +61,28 @@
       height: auto;
       cursor: pointer;
     }
+
+    .gallery-item {
+      overflow: hidden;
+    }
+    .gallery-item img {
+      opacity: 0;
+      transition: opacity 0.3s ease-in-out;
+    }
+    .gallery-item img.loaded {
+      opacity: 1;
+    }
+    .gallery-item .skeleton {
+      position: absolute;
+      border-radius: 4px;
+      inset: 0; /* Shorthand for top:0, right:0, bottom:0, left:0 */
+      background-color: #e2e2e2; /* Base color of the skeleton */
+      animation: pulse 1.5s infinite ease-in-out;
+      /* Optional: Add a shimmer effect using a pseudo-element or background gradient animation */
+    }
+    .gallery-item img.loaded + .skeleton {
+      display: none;
+    }
     #image-dialog::part(panel) {
       background-color: black;
     }
@@ -78,8 +100,6 @@
     }
 
     .header {
-      background-color: var(--colorNeutralBackground1);
-      color: var(--colorNeutralForeground1);
       padding: 20px 24px;
     }
 
@@ -133,9 +153,9 @@
       ></path>
     </svg>
   </template>
-  <fluent-text block class="bg header"><h1>{{ page.t }} Gallery</h1></fluent-text>
-  <div style="flex:1; padding: 24px; color: var(--colorNeutralForeground2);" class="bg">
+  <div style="min-height: 100vh;; padding: 24px; color: var(--colorNeutralForeground2);" class="bg">
     <div style="min-width: 400px;">
+      <fluent-text block class="bg header"><h1>{{ page.t }} Gallery</h1></fluent-text>
       <fluent-text>{{ page.h }}</fluent-text>
       <fluent-text block style="padding-top: 4px;">
         Submit images through <a href="https://github.com/rinaboards/gallery/issues">the page's issues list</a> (see <a href="https://github.com/rinaboards/gallery/blob/master/CONTRIBUTING.md">here</a> for how to write an entry)
