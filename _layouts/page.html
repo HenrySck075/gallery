@@ -64,6 +64,8 @@
 
     .gallery-item {
       overflow: hidden;
+      width: 100px;
+      height: 100px;
     }
     .gallery-item img {
       opacity: 0;
@@ -80,7 +82,18 @@
       animation: pulse 1.5s infinite ease-in-out;
       /* Optional: Add a shimmer effect using a pseudo-element or background gradient animation */
     }
-    .gallery-item img.loaded + .skeleton {
+    @keyframes pulse {
+      0% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.5;
+      }
+      100% {
+        opacity: 1;
+      }
+    }
+    .gallery-item .skeleton:has(+ img.loaded) {
       display: none;
     }
     #image-dialog::part(panel) {
