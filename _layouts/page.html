@@ -63,7 +63,12 @@
     }
 
     .gallery-item {
+      position: relative;
       overflow: hidden;
+    }
+    .gallery-item:not(:has(img.loaded)) {
+      width: 300px;
+      height: 300px;
     }
     .gallery-item img {
       opacity: 0;
