@@ -150,7 +150,7 @@ fetch('metadata.mpk')
         // disable visibility on all items not containing any of the selected categories
         document.querySelectorAll(".gallery-item").forEach((item)=>{
           const itemCategories = JSON.parse(item.dataset.category);
-          const hasCategory = selectedCategories.length === 0 || selectedCategories.some((cat)=>itemCategories.includes(cat));
+          const hasCategory = selectedCategories.length === 0 || selectedCategories.every((cat)=>itemCategories.includes(cat));
           item.style.display = hasCategory ? "block" : "none";
         })
       }, 1500);
