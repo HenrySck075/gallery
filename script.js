@@ -156,6 +156,19 @@ fetch('metadata.mpk')
       }, 1500);
     })
 
+    const lazyLoadObserver = new IntersectionObserver((entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          // The element is now in or near the viewport
+          const img = entry.target.querySelector("img");
+          img.src = img.dataset.src;
+          img.onload = ()=>img.classList.add("loaded");
+
+          observer.unobserve(entry.target); // Stop observing once loaded
+        }
+      });
+    })
+
     data.forEach(item => {
       // Use standard HTML for the grid items
       const itemContainer = document.createElement('div');
@@ -180,14 +193,10 @@ fetch('metadata.mpk')
       }
       // The image element
       const img = document.createElement('img');
-      img.src = `../assets/thumbnails/${folder}/${item.img}`;
+      img.dataset.src = `../assets/thumbnails/${folder}/${item.img}`;
       img.alt = item.title;
-      img.loading = "lazy";
-      img.width = "100px";
-      img.height = "100px";
       img.setAttribute('data-lat', llp[0]);
       img.setAttribute('data-lng', llp[1]);
-      img.onload = ()=>img.classList.add("loaded");
       
       {
         const skeleton = document.createElement("div");
@@ -195,6 +204,7 @@ fetch('metadata.mpk')
         itemContainer.appendChild(skeleton)
       }
       itemContainer.appendChild(img);
+      lazyLoadObserver.observe(itemContainer);
       gallery.appendChild(itemContainer);
 
       const mercUtil = new MercatorUtils(1000);
