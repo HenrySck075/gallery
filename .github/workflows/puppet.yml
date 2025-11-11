@@ -213,8 +213,8 @@ jobs:
           name: wplace-images-world
           path: ./assets/images/world
 
-      - name: Get spotlight background
-        if: needs.capture-images.result == 'skipped'
+      - name: Get spotlight background (from latest run)
+        if: needs.windows-spotlight.result == 'skipped'
         uses: dawidd6/action-download-artifact@v3
         with:
           name: spotlight
@@ -226,8 +226,8 @@ jobs:
           search_artifacts: true
           
           path: ./assets/spotlight
-      - name: Get spotlight background
-        if: needs.capture-images.result == 'success'
+      - name: Get spotlight background (from this run)
+        if: needs.windows-spotlight.result == 'success'
         uses: actions/download-artifact@v4
         with:
           name: spotlight
