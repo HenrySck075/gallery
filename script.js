@@ -187,8 +187,8 @@ fetch('metadata.mpk')
         const bounds = item.bounds;
         const sw = bounds[0];
         const ne = bounds[1];
-        const centerLat = (sw[1] + ne[1]) / 2;
-        const centerLng = (sw[0] + ne[0]) / 2;
+        const centerLat = (sw[0] + ne[0]) / 2;
+        const centerLng = (sw[1] + ne[1]) / 2;
         llp = [centerLat, centerLng];
       }
       // The image element
