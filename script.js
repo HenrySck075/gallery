@@ -92,7 +92,7 @@ submit_btn.addEventListener("click", ()=>{
   const filename = document.getElementById("submit-filename").value;
   const coordLat = parseFloat(document.getElementById("submit-coord-lat").value);
   const coordLng = parseFloat(document.getElementById("submit-coord-lng").value);
-  const categories = (document.getElementById("submit-categories").value ?? "").split(",").map((v)=>v.trim()).filter((v)=>v.length > 0);
+  const tags = (document.getElementById("submit-tags").value ?? "").split(",").map((v)=>v.trim()).filter((v)=>v.length > 0);
 
   if (!title || !description || !filename || isNaN(coordLat) || isNaN(coordLng)) {
     alert("Please fill in all required fields.");
@@ -104,7 +104,7 @@ submit_btn.addEventListener("click", ()=>{
     title: title,
     description: description,
     coordinate: [coordLat, coordLng],
-    categories: categories,
+    tags: tags,
     world: full_version
   };
 
@@ -129,10 +129,10 @@ fetch('metadata.mpk')
   .then(response => response.arrayBuffer())
   .then(msg => {
     const data = decode(msg);
-    // collect all categories
-    const categories = new Set(data.map((v)=>v.categories??[]).flat());
-    console.log(categories)
-    document.getElementById("filter-dropdown-options").append(...(Array.from(categories).map((v)=>{
+    // collect all tags
+    const tags = new Set(data.map((v)=>v.tags??[]).flat());
+    console.log(tags)
+    document.getElementById("filter-dropdown-options").append(...(Array.from(tags).map((v)=>{
       const e = document.createElement("fluent-option");
       e.value = v;
       e.textContent = v;
@@ -146,11 +146,11 @@ fetch('metadata.mpk')
     fd.addEventListener("change", ()=>{
       clearTimeout(wlwlwl);
       wlwlwl = setTimeout(()=>{
-        const selectedCategories = fd.enabledOptions.filter((v)=>v._currentSelected).map((v)=>v._value)
-        // disable visibility on all items not containing any of the selected categories
+        const selectedTags = fd.enabledOptions.filter((v)=>v._currentSelected).map((v)=>v._value)
+        // disable visibility on all items not containing any of the selected tags
         document.querySelectorAll(".gallery-item").forEach((item)=>{
-          const itemCategories = JSON.parse(item.dataset.category);
-          const hasCategory = selectedCategories.length === 0 || selectedCategories.every((cat)=>itemCategories.includes(cat));
+          const itemTags = JSON.parse(item.dataset.tags);
+          const hasCategory = selectedTags.length === 0 || selectedTags.every((cat)=>itemTags.includes(cat));
           item.style.display = hasCategory ? "block" : "none";
         })
       }, 1500);
@@ -173,7 +173,7 @@ fetch('metadata.mpk')
       // Use standard HTML for the grid items
       const itemContainer = document.createElement('div');
       itemContainer.className = 'gallery-item'; // Use a generic class for styling
-      itemContainer.dataset.category = JSON.stringify(item["categories"] ?? [])
+      itemContainer.dataset.tags = JSON.stringify(item["tags"] ?? [])
   
       let llp = item.coordinate;
       if (llp == undefined) {
