@@ -178,7 +178,12 @@ await page.goto("https://wplace.live")
 if (process.env.ENABLE_RECORDING)
   rec = await page.screencast({path: "debug/r.webm", format: "webm"})
 
-await page.locator("button[data-tip=\"Random place\"]").click()
+await page.locator("button[data-tip=\"Random place\"]").waitHandle().then(()=>{
+  // click in the browser context instead
+  return page.evaluate(()=>{
+    document.querySelector("button[data-tip=\"Random place\"]").click()
+  });
+})
 
 const canvasHandle = await page.waitForSelector("canvas.maplibregl-canvas");
 if (canvasHandle) {
