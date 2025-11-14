@@ -116,8 +116,18 @@ jobs:
     - name: Run task
       env:
         WEBGL_WORKAROUND: amogus
+        ENABLE_RECORDING: 7
       run: node main.ts ../${{ matrix.metadata-folder }}/metadata.json
       working-directory: ./renderer
+    - name: Upload Diagnostic Artifact on Failure
+       uses: actions/upload-artifact@v4
+       # The crucial part: 'if: failure()' ensures this step ONLY runs if a previous step in the job failed.
+       if: failure()
+       with:
+       name: session-recording-${{ matrix.metadata-folder }}
+       path: renderer/debug/r.webm
+       # Optional: If you want to keep the artifact for a shorter time
+       retention-days: 1
 
     - name: Upload images
       uses: actions/upload-artifact@v4
