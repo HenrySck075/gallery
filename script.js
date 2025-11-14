@@ -169,12 +169,30 @@ fetch('metadata.mpk')
       });
     })
 
+    const mercUtil = new MercatorUtils(1000);
+    const openImageDialog = (item, llp) => {
+      dialogImage.src = `../assets/images/${folder}/${item.img}`;
+      m_title.textContent = item.title;
+      m_desc.textContent = item.description ?? "";
+      m_region.textContent = regionMaps[item.img];
+
+      const tilePos = mercUtil.latLonToTileAndPixel(llp[0], llp[1], 11)
+
+      m_tilePos.innerHTML = `Tx: ${tilePos.tile[0]}, Ty: ${tilePos.tile[1]}, Px: ${tilePos.pixel[0]}, Py: ${tilePos.pixel[1]}<br/>C: ${llp}`
+      
+      redirectBtn.onclick = () => {
+        window.location.href = `https://wplace.live/?lat=${llp[0]}&lng=${llp[1]}&zoom=${item.zoom??12}`;
+      };
+
+      dialog.show();
+    }
+
     data.forEach(item => {
       // Use standard HTML for the grid items
       const itemContainer = document.createElement('div');
       itemContainer.className = 'gallery-item'; // Use a generic class for styling
       itemContainer.dataset.tags = JSON.stringify(item["tags"] ?? [])
-  
+
       let llp = item.coordinate;
       if (llp == undefined) {
         /*
@@ -190,6 +208,10 @@ fetch('metadata.mpk')
         const centerLat = (sw[0] + ne[0]) / 2;
         const centerLng = (sw[1] + ne[1]) / 2;
         llp = [centerLat, centerLng];
+      }
+
+      if (item.img == window.location.hash) {
+        openImageDialog(item, llp);
       }
       // The image element
       const img = document.createElement('img');
@@ -207,8 +229,6 @@ fetch('metadata.mpk')
       lazyLoadObserver.observe(itemContainer);
       gallery.appendChild(itemContainer);
 
-      const mercUtil = new MercatorUtils(1000);
-
       const e = (s)=>{
         // if s is not a number type, insult the contributor by throwing an error
         if (isNaN(s)) {
@@ -217,22 +237,7 @@ fetch('metadata.mpk')
         return s
       }
 
-      img.addEventListener('click', () => {
-        dialogImage.src = `../assets/images/${folder}/${item.img}`;
-        m_title.textContent = item.title;
-        m_desc.textContent = item.description ?? "";
-        m_region.textContent = regionMaps[item.img];
-
-        const tilePos = mercUtil.latLonToTileAndPixel(llp[0], llp[1], 11)
-
-        m_tilePos.innerHTML = `Tx: ${tilePos.tile[0]}, Ty: ${tilePos.tile[1]}, Px: ${tilePos.pixel[0]}, Py: ${tilePos.pixel[1]}<br/>C: ${llp}`
-        
-        redirectBtn.onclick = () => {
-          window.location.href = `https://wplace.live/?lat=${llp[0]}&lng=${llp[1]}&zoom=${item.zoom??12}`;
-        };
-
-        dialog.show();
-      });
+      img.addEventListener('click', openImageDialog(item,llp));
     });
   })
   .catch(error => console.error('Error fetching metadata:', error));
