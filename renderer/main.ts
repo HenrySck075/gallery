@@ -119,14 +119,12 @@ devtools.on("Debugger.scriptParsed", (p)=>{
   // Find the position after "{get map(){return " (before the return) in the src
   devtools.send("Debugger.getScriptSource", {scriptId: p.scriptId}).then(async (src)=>{
     const t1 = ".Map=class extends ";
-    const t2 = "}_setupContainer()";
-    const index1 = src.scriptSource.indexOf(t1)
-    if (index1 === -1) return;
+    const t2 = "}flyTo(";
+    const index = src.scriptSource.indexOf(t2)
+    if (index === -1) return;
 
-    const index2 = src.scriptSource.indexOf(t2, index1 + t1.length);
-    if (index2 === -1) return;
 
-    const pos = src.scriptSource.indexOf("{", index2 + t2.length)+1;
+    const pos = src.scriptSource.indexOf("{", index + t2.length)+1;
 
     const copier = `window.${mapobj_name} = this`
 
@@ -180,6 +178,8 @@ await page.goto("https://wplace.live")
 if (process.env.ENABLE_RECORDING)
   rec = await page.screencast({path: "debug/r.webm", format: "webm"})
 
+await page.locator("button[data-tip=\"Random place\"]").click()
+
 const canvasHandle = await page.waitForSelector("canvas.maplibregl-canvas");
 if (canvasHandle) {
   // Anti-puppet-stupidity measure: delete every elements in body > div except the one that contains canvasHandle
@@ -215,8 +215,6 @@ if (canvasHandle) {
 
 // Wait for 30s until maplibre_map_extracted is true
 const ct = Date.now();
-let h = 0;
-logger.debug("Checking the list of map objects");
 while (!maplibre_map_extracted) {
   await sleep(100);
   if (Date.now() - ct > 30000) {
