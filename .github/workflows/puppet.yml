@@ -116,7 +116,8 @@ jobs:
     - name: Run task
       env:
         WEBGL_WORKAROUND: amogus
-        ENABLE_RECORDING: 7
+        # IMPORTANT: Saving the recording takes forever so only enable recording when something fails
+        # ENABLE_RECORDING: 7
       run: node main.ts ../${{ matrix.metadata-folder }}/metadata.json
       working-directory: ./renderer
     - name: Upload Diagnostic Artifact on Failure
