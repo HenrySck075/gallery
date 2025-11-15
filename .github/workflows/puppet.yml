@@ -26,7 +26,8 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       docker_build: ${{ steps.filter.outputs.Dockerfile }}
-      render: ${{ steps.filter.outputs.renderer }}
+      render_domestic: ${{ steps.filter.outputs.render_domestic }}
+      render_world: ${{ steps.filter.outputs.render_world }}
       spotlight: ${{ steps.filter.outputs.spotlight }}
     steps:
     - uses: actions/checkout@v4
@@ -37,9 +38,11 @@ jobs:
         filters: |
           Dockerfile:
             - 'Dockerfile'
-          renderer:
+          render_domestic:
             - 'renderer/main.ts'
             - 'domestic/metadata.json'
+          render_world:
+            - 'renderer/main.ts'
             - 'world/metadata.json'
           spotlight:
             - 'renderer/spotlight/**'
@@ -91,10 +94,17 @@ jobs:
       fail-fast: true
       matrix:
         metadata-folder: [domestic, world]
+        world-metadata-changed: ${{ needs.filter.outputs.render_world }}
+        domestic-metadata-changed: ${{ needs.filter.outputs.render_domestic }}
+        exclude:
+        - metadata-folder: domestic
+          domestic-metadata-changed: false
+        - metadata-folder: world
+          world-metadata-changed: false
     if: |
       always() && 
       (needs.build-and-push-image.result == 'success' || needs.build-and-push-image.result == 'skipped') &&
-      (needs.filter.outputs.render == 'true' || github.event_name == 'schedule' || inputs.force_recapture == 'true' )
+      (needs.filter.outputs.render_domestic == 'true' || needs.filter.outputs.render_world == 'true' || github.event_name == 'schedule' || inputs.force_recapture == 'true')
     permissions:
       contents: read
       packages: read
@@ -168,7 +178,7 @@ jobs:
       with:
         name: spotlight
         path: renderer/spotlight/spotlight
-        timeout-minutes: 30 # rarely ever captures images this long but if it does pls increase this
+        retention-days: 1 # rarely ever captures images this long but if it does pls increase this
 
   # The GitHub Pages
   # Build job

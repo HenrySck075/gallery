@@ -210,7 +210,7 @@ fetch('metadata.mpk')
         llp = [centerLat, centerLng];
       }
 
-      if (item.img == window.location.hash) {
+      if (item.img === window.location.hash) {
         openImageDialog(item, llp);
       }
       // The image element
@@ -237,7 +237,7 @@ fetch('metadata.mpk')
         return s
       }
 
-      img.addEventListener('click', openImageDialog(item,llp));
+      img.addEventListener('click', ()=>openImageDialog(item,llp));
     });
   })
   .catch(error => console.error('Error fetching metadata:', error));
