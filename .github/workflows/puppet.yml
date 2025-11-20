@@ -32,25 +32,8 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     # known: Anything not a push event causes every file to be marked as changed
-
-outputs:
-  Dockerfile:
-    description: 'True if Dockerfile changed.'
-    value: ${{ steps.path-checker-js.outputs.Dockerfile }}
-  render_domestic:
-    description: 'True if domestic rendering paths changed.'
-    value: ${{ steps.path-checker-js.outputs.render_domestic }}
-  render_world:
-    description: 'True if world rendering paths changed.'
-    value: ${{ steps.path-checker-js.outputs.render_world }}
-  spotlight:
-    description: 'True if any files in renderer/spotlight changed.'
-    value: ${{ steps.path-checker-js.outputs.spotlight }}
-runs:
-  using: "composite"
-  steps:
     - name: Check Paths
-      id: path-checker-js
+      id: filter
       uses: actions/github-script@v8
       with:
         # Note: This step requires the GITHUB_TOKEN to have the 'actions: read' permission
