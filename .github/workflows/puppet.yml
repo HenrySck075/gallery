@@ -39,8 +39,6 @@ jobs:
         # Note: This step requires the GITHUB_TOKEN to have the 'actions: read' permission
         # in the main workflow to successfully query past runs.
         script: |
-          const { exec } = require('@actions/exec');
-
           // --- 1. Define the Filters ---
           const pathFilters = {
               'Dockerfile': ['Dockerfile'],
