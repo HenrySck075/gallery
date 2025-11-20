@@ -32,99 +32,20 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     # known: Anything not a push event causes every file to be marked as changed
-    - name: Check Paths
+    - uses: dorny/paths-filter@v3
       id: filter
-      uses: actions/github-script@v8
       with:
-        # Note: This step requires the GITHUB_TOKEN to have the 'actions: read' permission
-        # in the main workflow to successfully query past runs.
-        script: |
-          // --- 1. Define the Filters ---
-          const pathFilters = {
-              'Dockerfile': ['Dockerfile'],
-              'render_domestic': ['renderer/main.ts', 'domestic/metadata.json'],
-              'render_world': ['renderer/main.ts', 'world/metadata.json'],
-              'spotlight': ['renderer/spotlight/**']
-          };
-
-          // --- 2. Find the Base SHA (Last Successful Run) ---
-          let baseSha;
-          const workflowName = core.getInput('workflow-name') || 'puppet.yml';
-          const currentBranch = context.ref.split('/').pop();
-
-          try {
-              core.info(`Searching for last successful run of ${workflowName} on branch ${currentBranch}...`);
-              
-              // Use the REST API to find the workflow runs
-              const runs = await github.rest.actions.listWorkflowRunsForRepo({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  workflow_id: workflowName,
-                  status: 'success',
-                  branch: currentBranch,
-                  per_page: 50
-              });
-
-              // Find the latest successful run that is NOT the current run's SHA
-              const successfulRun = runs.data.workflow_runs.find(run => 
-                  run.head_sha !== context.sha
-              );
-
-              if (successfulRun) {
-                  baseSha = successfulRun.head_sha;
-                  core.info(`Found last successful commit: ${baseSha}`);
-              } else {
-                  core.warning(`Could not find last successful run SHA for ${workflowName}.`);
-                  
-                  // Fallback: Compare against the previous commit
-                  const { stdout: previousSha } = await exec.getExecOutput('git', ['rev-parse', 'HEAD~1'], { silent: true });
-                  baseSha = previousSha.trim() || context.sha;
-                  core.warning(`Falling back to comparing against: ${baseSha}`);
-              }
-
-          } catch (error) {
-              core.setFailed(`Failed to find base SHA via API: ${error.message}`);
-              return;
-          }
-
-          // --- 3. Get Changed Files using git diff ---
-          const { stdout: changedFilesOutput } = await exec.getExecOutput(
-            'git', 
-            ['diff', '--name-only', baseSha, context.sha], 
-            { silent: true }
-          );
-          
-          const changedFiles = changedFilesOutput.trim().split('\n').filter(f => f.length > 0);
-          core.info(`\n--- Changed Files (${baseSha}...${context.sha}) ---\n${changedFiles.join('\n')}\n---------------------------------------\n`);
-
-          // --- 4. Process Filters and Set Outputs ---
-          for (const [filterName, patterns] of Object.entries(pathFilters)) {
-              let matchFound = false;
-
-              for (const pattern of patterns) {
-                  const isMatch = changedFiles.some(file => {
-                      if (pattern.endsWith('/**')) {
-                          // Directory glob check (e.g., 'dir/**' matches 'dir/file.txt')
-                          const dirPrefix = pattern.slice(0, -3); // remove '/**'
-                          return file.startsWith(dirPrefix + '/');
-                      } else {
-                          // Exact file path check
-                          return file === pattern;
-                      }
-                  });
-
-                  if (isMatch) {
-                      matchFound = true;
-                      break;
-                  }
-              }
-              
-              // Set Output
-              core.info(`Filter Result [${filterName}]: ${matchFound}`);
-              core.setOutput(filterName, matchFound.toString());
-          }
-
-
+        filters: |
+          Dockerfile:
+            - 'Dockerfile'
+          render_domestic:
+            - 'renderer/main.ts'
+            - 'domestic/metadata.json'
+          render_world:
+            - 'renderer/main.ts'
+            - 'world/metadata.json'
+          spotlight:
+            - 'renderer/spotlight/**'
   build-and-push-image:
     runs-on: ubuntu-latest
     needs: filter
