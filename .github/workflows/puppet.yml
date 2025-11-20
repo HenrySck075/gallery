@@ -192,13 +192,13 @@ runs:
       fail-fast: true
       matrix:
         metadata-folder: [domestic, world]
-        world-metadata-changed: [${{ needs.filter.outputs.render_world }}]
-        domestic-metadata-changed: [${{ needs.filter.outputs.render_domestic }}]
-        exclude:
-        - metadata-folder: domestic
-          domestic-metadata-changed: false
-        - metadata-folder: world
-          world-metadata-changed: false
+        #world-metadata-changed: [${{ needs.filter.outputs.render_world }}]
+        #domestic-metadata-changed: [${{ needs.filter.outputs.render_domestic }}]
+        #exclude:
+        #- metadata-folder: domestic
+        #  domestic-metadata-changed: false
+        #- metadata-folder: world
+        #  world-metadata-changed: false
     if: |
       always() && 
       (needs.build-and-push-image.result == 'success' || needs.build-and-push-image.result == 'skipped') &&
